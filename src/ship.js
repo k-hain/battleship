@@ -1,7 +1,10 @@
 export class Ship {
-    constructor (length) {
+    constructor (length, x, y, isHorizontal) {
         this.length = length;
         this.hits = 0;
+        this.x = x;
+        this.y = y;
+        this.isHorizontal = isHorizontal;
     }
 
     isSunk () {
