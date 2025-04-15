@@ -8,6 +8,7 @@ class Space {
         this.y = y;
         this.ship = null;
         this.isHit = false;
+        this.isLocked = false;
     }
 }
 
@@ -29,38 +30,45 @@ export class Gameboard {
     }
 
     placeShip(length, x, y, isHorizontal) {
-        let canPlace = true;
-        if (isHorizontal) {
-            for (let i = 0; i <= length; i++) {
-                if (this.spaces[x+i][y].ship) {
-                    canPlace = false;
+        let canPlace = this.validateShipPlacement(length, x, y, isHorizontal);
+
+        if (canPlace) {
+            const newShip = new Ship(length, x, y, isHorizontal);
+            this.ships.push(newShip);
+
+            for (let i = 0; i < length; i++) {
+                let iH, iV;
+
+                if (isHorizontal) {
+                    iH = i;
+                    iV = 0; 
+                } else {
+                    iH = 0;
+                    iV = i;
                 }
+
+                this.spaces[x+iH][y+iV].ship = newShip;
+            }
+        } 
+    }
+
+    validateShipPlacement (length, x, y, isHorizontal) {
+        for (let i = 0; i < length; i++) {
+            let iH, iV;
+
+            if (isHorizontal) {
+                iH = i;
+                iV = 0; 
+            } else {
+                iH = 0;
+                iV = i;
             }
 
-            if (canPlace) {
-                const newShip = new Ship(length, x, y, isHorizontal);
-                this.ships.push(newShip);
-
-                for (let i = 0; i <= length; i++) {
-                    this.spaces[x+i][y].ship = newShip;
-                }
-            } 
-        } else {
-            for (let i = 0; i <= length; i++) {
-                if (this.spaces[x][y+i].ship) {
-                    canPlace = false;
-                }
+            if (this.spaces[x+iH][y+iV].ship || this.spaces[x+iH][y+iV].isLocked) {
+                return false;
             }
-
-            if (canPlace) {
-                const newShip = new Ship(length, x, y, isHorizontal);
-                this.ships.push(newShip);
-
-                for (let i = 0; i <= length; i++) {
-                    this.spaces[x][y+i].ship = newShip;
-                }
-            } 
-        }    
+        }
+        return true;
     }
 
     receiveAttack(x, y) {
