@@ -37,16 +37,7 @@ export class Gameboard {
             this.ships.push(newShip);
 
             for (let i = 0; i < length; i++) {
-                let iH, iV;
-
-                if (isHorizontal) {
-                    iH = i;
-                    iV = 0; 
-                } else {
-                    iH = 0;
-                    iV = i;
-                }
-
+                let [iH, iV] = this.setShipDrawDirection(newShip.isHorizontal, i);
                 this.spaces[x+iH][y+iV].ship = newShip;
             }
 
@@ -56,15 +47,7 @@ export class Gameboard {
 
     validateShipPlacement (length, x, y, isHorizontal) {
         for (let i = 0; i < length; i++) {
-            let iH, iV;
-
-            if (isHorizontal) {
-                iH = i;
-                iV = 0; 
-            } else {
-                iH = 0;
-                iV = i;
-            }
+            let [iH, iV] = this.setShipDrawDirection(isHorizontal, i);
 
             if (this.spaces[x+iH][y+iV].ship || this.spaces[x+iH][y+iV].isLocked) {
                 return false;
@@ -94,19 +77,8 @@ export class Gameboard {
 
     addLockedArea (ship) {
         for (let i = -1; i < ship.length + 1; i++) {
-            let iH, iV, offsetH, offsetV;
-
-            if (ship.isHorizontal) {
-                iH = i;
-                iV = 0;
-                offsetH = 0;
-                offsetV = 1;
-            } else {
-                iH = 0;
-                iV = i;
-                offsetH = 1;
-                offsetV = 0;
-            }
+            let [iH, iV] = this.setShipDrawDirection(ship.isHorizontal, i);
+            let [offsetH, offsetV] = this.setShipDrawDirectionOffset(ship.isHorizontal);
 
             if (
                 this.checkBounds([ship.x+iH+offsetH, ship.y+iV+offsetV])
@@ -136,5 +108,21 @@ export class Gameboard {
             }
         }
         return true;
+    }
+
+    setShipDrawDirection (isHorizontal, i) {
+        if (isHorizontal) {
+            return [i, 0];
+        } else {
+            return [0, i];
+        }
+    }
+
+    setShipDrawDirectionOffset (isHorizontal) {
+        if (isHorizontal) {
+            return [0, 1];
+        } else {
+            return [1, 0];
+        }
     }
 }
