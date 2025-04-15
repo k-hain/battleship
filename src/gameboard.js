@@ -1,6 +1,7 @@
 import { Ship } from "./ship.js";
 
 const BOARD_WIDTH = 10;
+const SHIP_LENGTHS = [5, 4, 3, 3, 2];
 
 class Space {
     constructor (x, y) {
@@ -16,7 +17,14 @@ export class Gameboard {
     constructor () {
         this.spaces = [];
         this.ships = [];
+        this.makeShips();
         this.makeBoard();
+    }
+
+    makeShips () {
+        for (let length of SHIP_LENGTHS) {
+            this.ships.push(new Ship(length, true))
+        }
     }
 
     makeBoard () {
@@ -29,19 +37,19 @@ export class Gameboard {
         }
     }
 
-    placeShip (length, x, y, isHorizontal) {
-        let canPlace = this.validateShipPlacement(length, x, y, isHorizontal);
+    placeShip (ship, x, y) {
+        if (
+            this.validateShipPlacement(ship.length, x, y, ship.isHorizontal)
+        ) {
+            ship.x = x;
+            ship.y = y;
 
-        if (canPlace) {
-            const newShip = new Ship(length, x, y, isHorizontal);
-            this.ships.push(newShip);
-
-            for (let i = 0; i < length; i++) {
-                let [iH, iV] = this.setShipDrawDirection(newShip.isHorizontal, i);
-                this.spaces[x+iH][y+iV].ship = newShip;
+            for (let i = 0; i < ship.length; i++) {
+                let [iH, iV] = this.setShipDrawDirection(ship.isHorizontal, i);
+                this.spaces[x+iH][y+iV].ship = ship;
             }
 
-            this.addLockedArea(newShip);
+            this.addLockedArea(ship);
         }
     }
 
