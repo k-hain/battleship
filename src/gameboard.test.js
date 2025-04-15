@@ -25,7 +25,7 @@ test('Ship - make 2 attacks', () => {
 test('Empty board - make attack', () => {
     const board = new Gameboard();
     board.receiveAttack(5, 3);
-    expect(board.spaces[5][3].isHit).toBeTrue;
+    expect(board.spaces[5][3].isHit).toBe(true);
 });
 
 test('Sink all ships - check if true', () => {
@@ -34,7 +34,7 @@ test('Sink all ships - check if true', () => {
     board.placeShip(1, 0, 3, true);
     board.receiveAttack(0, 0);
     board.receiveAttack(0, 3);
-    expect(board.checkAllSunk()).toBeTrue;
+    expect(board.checkAllSunk()).toBe(true);
 });
 
 test('All ships not sunk', () => {
@@ -43,5 +43,11 @@ test('All ships not sunk', () => {
     board.placeShip(3, 0, 3, true);
     board.receiveAttack(0, 0);
     board.receiveAttack(0, 3);
-    expect(board.checkAllSunk()).toBeFalse;
+    expect(board.checkAllSunk()).toBe(false);
+});
+
+test('Locked area around ships', () => {
+    const board = new Gameboard();
+    board.placeShip(2, 3, 5, true);
+    expect(board.spaces[3][4].isLocked).toBe(true);
 });
