@@ -19,7 +19,7 @@ export class Gameboard {
         this.makeBoard();
     }
 
-    makeBoard() {
+    makeBoard () {
         for (let x = 0; x < BOARD_WIDTH; x++) {
             this.spaces.push(new Array());
 
@@ -29,7 +29,7 @@ export class Gameboard {
         }
     }
 
-    placeShip(length, x, y, isHorizontal) {
+    placeShip (length, x, y, isHorizontal) {
         let canPlace = this.validateShipPlacement(length, x, y, isHorizontal);
 
         if (canPlace) {
@@ -49,7 +49,9 @@ export class Gameboard {
 
                 this.spaces[x+iH][y+iV].ship = newShip;
             }
-        } 
+
+            this.addLockedArea(newShip);
+        }
     }
 
     validateShipPlacement (length, x, y, isHorizontal) {
@@ -71,7 +73,7 @@ export class Gameboard {
         return true;
     }
 
-    receiveAttack(x, y) {
+    receiveAttack (x, y) {
         if (!this.spaces[x][y].isHit) {
             this.spaces[x][y].isHit = true;
 
@@ -81,9 +83,55 @@ export class Gameboard {
         }
     }
 
-    checkAllSunk() {
+    checkAllSunk () {
         for (let ship of this.ships) {
             if (!ship.isSunk()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    addLockedArea (ship) {
+        for (let i = -1; i < ship.length + 1; i++) {
+            let iH, iV, offsetH, offsetV;
+
+            if (ship.isHorizontal) {
+                iH = i;
+                iV = 0;
+                offsetH = 0;
+                offsetV = 1;
+            } else {
+                iH = 0;
+                iV = i;
+                offsetH = 1;
+                offsetV = 0;
+            }
+
+            if (
+                this.checkBounds([ship.x+iH+offsetH, ship.y+iV+offsetV])
+            ) {
+                this.spaces[ship.x+iH+offsetH][ship.y+iV+offsetV].isLocked = true;
+            }
+            if (
+                this.checkBounds([ship.x+iH-offsetH, ship.y+iV-offsetV])
+            ) {
+               this.spaces[ship.x+iH-offsetH][ship.y+iV-offsetV].isLocked = true; 
+            }
+        
+            if (i === -1 || i === ship.length) {
+                if (
+                    this.checkBounds([ship.x+iH, ship.y+iV])
+                ) {
+                    this.spaces[ship.x+iH][ship.y+iV].isLocked = true;
+                }       
+            }
+        }
+    }
+
+    checkBounds (values) {
+        for (let value of values) {
+            if (value >= BOARD_WIDTH || value < 0) {
                 return false;
             }
         }

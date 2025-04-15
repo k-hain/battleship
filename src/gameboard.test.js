@@ -49,5 +49,14 @@ test('All ships not sunk', () => {
 test('Locked area around ships', () => {
     const board = new Gameboard();
     board.placeShip(2, 3, 5, true);
+    expect(board.spaces[2][4].isLocked).toBe(true);
+    expect(board.spaces[2][5].isLocked).toBe(true);
+    expect(board.spaces[2][6].isLocked).toBe(true);
     expect(board.spaces[3][4].isLocked).toBe(true);
+    expect(board.spaces[3][6].isLocked).toBe(true);
+    expect(board.spaces[4][4].isLocked).toBe(true);
+    expect(board.spaces[4][6].isLocked).toBe(true);
+    expect(board.spaces[5][4].isLocked).toBe(true);
+    expect(board.spaces[5][5].isLocked).toBe(true);
+    expect(board.spaces[5][6].isLocked).toBe(true);
 });
