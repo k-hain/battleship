@@ -83,10 +83,10 @@ export class Gameboard {
 
     checkAllSunk() {
         for (let ship of this.ships) {
-            if (ship.isSunk()) {
-                return true;
+            if (!ship.isSunk()) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }
