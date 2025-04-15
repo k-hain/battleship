@@ -6,15 +6,19 @@ test('Check horizontal ship', () => {
     const board = new Gameboard();
     board.placeShip(3, 0, 0, true);
     expect(board.spaces[2][0].ship).toEqual({length: 3, hits: 0, x: 0, y: 0, isHorizontal:true});
+    expect(board.spaces[0][0].ship).toEqual(board.spaces[1][0].ship);
+    expect(board.spaces[0][0].ship).toEqual(board.spaces[2][0].ship);
 });
 
 test('Check vertical ship', () => {
     const board = new Gameboard();
     board.placeShip(3, 0, 0, false);
     expect(board.spaces[0][2].ship).toEqual({length: 3, hits: 0, x: 0, y: 0, isHorizontal:false});
+    expect(board.spaces[0][0].ship).toEqual(board.spaces[0][1].ship);
+    expect(board.spaces[0][0].ship).toEqual(board.spaces[0][2].ship);
 });
 
-test('Ship - make 2 attacks', () => {
+test('Attacks on a ship', () => {
     const board = new Gameboard();
     board.placeShip(3, 0, 0, true);
     board.receiveAttack(1, 0);
@@ -22,13 +26,13 @@ test('Ship - make 2 attacks', () => {
     expect(board.spaces[0][0].ship.hits).toBe(2);
 });
 
-test('Empty board - make attack', () => {
+test('Attack on empty space', () => {
     const board = new Gameboard();
     board.receiveAttack(5, 3);
     expect(board.spaces[5][3].isHit).toBe(true);
 });
 
-test('Sink all ships - check if true', () => {
+test('checkAllSunk - all sunk', () => {
     const board = new Gameboard();
     board.placeShip(1, 0, 0, true);
     board.placeShip(1, 0, 3, true);
@@ -37,7 +41,7 @@ test('Sink all ships - check if true', () => {
     expect(board.checkAllSunk()).toBe(true);
 });
 
-test('All ships not sunk', () => {
+test('checkAllSunk - not all sunk', () => {
     const board = new Gameboard();
     board.placeShip(1, 0, 0, true);
     board.placeShip(3, 0, 3, true);
