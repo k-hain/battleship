@@ -27,24 +27,40 @@ export class Gameboard {
             }
         }
     }
-    //TODO vertical placement
-    placeShip(length, x, y) {
+
+    placeShip(length, x, y, isHorizontal) {
         let canPlace = true;
-
-        for (let i = 0; i <= length; i++) {
-            if (this.spaces[x+i][y].ship) {
-                canPlace = false;
-            }
-        }
-
-        if (canPlace) {
-            const newShip = new Ship(length, x, y, true);
-            this.ships.push(newShip);
-
+        if (isHorizontal) {
             for (let i = 0; i <= length; i++) {
-                this.spaces[x+i][y].ship = newShip;
+                if (this.spaces[x+i][y].ship) {
+                    canPlace = false;
+                }
             }
-        }
+
+            if (canPlace) {
+                const newShip = new Ship(length, x, y, isHorizontal);
+                this.ships.push(newShip);
+
+                for (let i = 0; i <= length; i++) {
+                    this.spaces[x+i][y].ship = newShip;
+                }
+            } 
+        } else {
+            for (let i = 0; i <= length; i++) {
+                if (this.spaces[x][y+i].ship) {
+                    canPlace = false;
+                }
+            }
+
+            if (canPlace) {
+                const newShip = new Ship(length, x, y, isHorizontal);
+                this.ships.push(newShip);
+
+                for (let i = 0; i <= length; i++) {
+                    this.spaces[x][y+i].ship = newShip;
+                }
+            } 
+        }    
     }
 
     receiveAttack(x, y) {
