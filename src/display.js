@@ -4,8 +4,34 @@ import { BOARD_WIDTH } from './gameboard.js';
 
 export class displayController {
     constructor (board1El, player1NameEl, board2El, player2NameEl) {
-        this.board1 = new boardDisplay(board1El, player1NameEl);
-        this.board2 = new boardDisplay(board2El, player2NameEl);
+        this.boardDisplay1 = new boardDisplay(board1El, player1NameEl);
+        this.boardDisplay2 = new boardDisplay(board2El, player2NameEl);
+        this.boardDisplays = [this.boardDisplay1, this.boardDisplay2];
+    }
+
+    refreshBoards() {
+        for (let boardDisplay of this.boardDisplays) {            
+            for (let rowX of boardDisplay.spaces) {
+                for (let space of rowX) {
+                    space.className = 'space';
+                }  
+            }
+        }
+    }
+
+    printBoards(boards) {
+        for (let board of boards) {
+            let current = boards.indexOf(board);
+            for (let rowX of board) {
+                for (let space of rowX) {
+                    if (space.ship) {
+                        this.boardDisplays[current].spaces[space.x][space.y].classList.add('space-ship');
+                    } else {
+                        this.boardDisplays[current].spaces[space.x][space.y].classList.add('space-empty');
+                    }
+                }
+            }
+        }   
     }
 }
 
@@ -23,7 +49,6 @@ class boardDisplay {
         this.boardEl.style.gridTemplateColmuns = `repeat(${BOARD_WIDTH}, 1fr)`;
 
         this.createSpaces();
-        //this.refreshDisplay();
     }
 
     setPlayerName (name) {
@@ -45,9 +70,4 @@ class boardDisplay {
             }
         } 
     }
-    /*
-    refreshDisplay() {
-
-    }
-    */
 }
