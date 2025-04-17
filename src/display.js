@@ -23,6 +23,7 @@ class boardDisplay {
         this.boardEl.style.gridTemplateColmuns = `repeat(${BOARD_WIDTH}, 1fr)`;
 
         this.createSpaces();
+        //this.refreshDisplay();
     }
 
     setPlayerName (name) {
@@ -39,9 +40,14 @@ class boardDisplay {
                 spaceEl.style.gridRow = `${y+1} / span 1`;
                 spaceEl.style.gridColumn = `${x+1} / span 1`;
                 spaceEl.textContent = `${x}, ${y}`;
+                spaceEl.classList.add('space');
                 this.boardEl.append(spaceEl);
             }
         } 
     }
-    
+    /*
+    refreshDisplay() {
+
+    }
+    */
 }

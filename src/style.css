@@ -81,6 +81,7 @@ h6 {
     --padding-base: 16px;
     --padding-large: 24px;
     --padding-huge: 48px;
+    --padding-2x-huge: 96px;
 
     --border-radius: 8px;
     --border-radius-small: 4px;
@@ -110,9 +111,9 @@ button:hover {
 
 .boards-outer-wrapper {
     display: flex;
-    gap: var(--padding-huge);
+    gap: var(--padding-2x-huge);
     justify-content: center;
-    padding: var(--padding-large);
+    padding: var(--padding-huge);
 }
 
 .board-wrapper {
@@ -126,4 +127,18 @@ button:hover {
     display: grid;
     width: 640px;
     height: 640px;
+}
+
+.space {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.space-ship {
+    background-color: rgb(89, 107, 165);
+}
+
+.space-empty {
+    background-color: rgb(196, 196, 196);
 }
