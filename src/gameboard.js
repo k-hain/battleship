@@ -37,6 +37,15 @@ export class Gameboard {
         }
     }
 
+    setupShips () {
+        let x = 0;
+        let y = 0;
+        for (let ship of this.ships) {
+            this.placeShip(ship, x, y);
+            y += 2;
+        }
+    }
+
     placeShip (ship, x, y) {
         if (
             this.validateShipPlacement(ship.length, x, y, ship.isHorizontal)
