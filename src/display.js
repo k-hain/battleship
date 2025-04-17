@@ -3,15 +3,17 @@
 import { BOARD_WIDTH } from './gameboard.js';
 
 export class displayController {
-    constructor (board1El, board2El) {
-        this.board1 = new boardDisplay(board1El);
-        this.board2 = new boardDisplay(board2El);
+    constructor (board1El, player1NameEl, board2El, player2NameEl) {
+        this.board1 = new boardDisplay(board1El, player1NameEl);
+        this.board2 = new boardDisplay(board2El, player2NameEl);
     }
 }
 
 class boardDisplay {
-    constructor (boardEl) {
+    constructor (boardEl, playerNameEl) {
         this.boardEl = boardEl;
+        this.playerNameEl = playerNameEl;
+        this.playerNameEl.textContent = 'Name';
         this.spaces = [];
         this.initDisplay();
     }
@@ -19,7 +21,12 @@ class boardDisplay {
     initDisplay () {
         this.boardEl.style.gridTemplateRows = `repeat(${BOARD_WIDTH}, 1fr)`;
         this.boardEl.style.gridTemplateColmuns = `repeat(${BOARD_WIDTH}, 1fr)`;
+
         this.createSpaces();
+    }
+
+    setPlayerName (name) {
+        this.playerNameEl.textContent = name;
     }
 
     createSpaces () {
