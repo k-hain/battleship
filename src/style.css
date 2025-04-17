@@ -106,3 +106,14 @@ button {
 button:hover {
     cursor: pointer;
 }
+
+.board-wrapper {
+    display: flex;
+    gap: var(--padding-base)
+}
+
+.board {
+    display: grid;
+    width: 400px;
+    height: 400px;
+}
