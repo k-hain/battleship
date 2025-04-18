@@ -1,0 +1,2 @@
+export const PUBLISH_PLAYER_NAMES = Symbol('PUBLISH_PLAYER_NAMES');
+export const FETCH_PLAYER_NAMES = Symbol('FETCH_PLAYER_NAMES');

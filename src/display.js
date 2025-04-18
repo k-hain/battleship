@@ -1,12 +1,15 @@
 /* global document */
 
 import { BOARD_WIDTH } from './gameboard.js';
+import { PUBLISH_PLAYER_NAMES, FETCH_PLAYER_NAMES } from './event-types.js';
+import PubSub from 'pubsub-js';
 
 export class displayController {
     constructor (board1El, player1NameEl, board2El, player2NameEl) {
         this.boardDisplay1 = new boardDisplay(board1El, player1NameEl);
         this.boardDisplay2 = new boardDisplay(board2El, player2NameEl);
         this.boardDisplays = [this.boardDisplay1, this.boardDisplay2];
+        PubSub.publish(FETCH_PLAYER_NAMES);
     }
 
     refreshBoards() {
@@ -33,6 +36,15 @@ export class displayController {
             }
         }   
     }
+
+    printPlayerNames = (function(msg, playerNames) {
+        for (let name of playerNames) {
+            let current = playerNames.indexOf(name);
+            this.boardDisplays[current].setPlayerName(name); 
+        }
+    }).bind(this);
+    printPlayerNamesToken = PubSub.subscribe(PUBLISH_PLAYER_NAMES, this.printPlayerNames);
+
 }
 
 class boardDisplay {
@@ -47,7 +59,6 @@ class boardDisplay {
     initDisplay () {
         this.boardEl.style.gridTemplateRows = `repeat(${BOARD_WIDTH}, 1fr)`;
         this.boardEl.style.gridTemplateColmuns = `repeat(${BOARD_WIDTH}, 1fr)`;
-
         this.createSpaces();
     }
 
