@@ -127,6 +127,7 @@ button:hover {
     display: grid;
     width: 640px;
     height: 640px;
+    gap: var(--padding-small);
 }
 
 .space {
