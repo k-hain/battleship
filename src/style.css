@@ -125,8 +125,8 @@ button:hover {
 
 .board {
     display: grid;
-    width: 640px;
-    height: 640px;
+    width: 480px;
+    height: 480px;
     gap: var(--padding-small);
 }
 
