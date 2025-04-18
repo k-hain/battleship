@@ -4,10 +4,10 @@ import { BOARD_WIDTH } from './gameboard.js';
 import { PUBLISH_PLAYER_NAMES, FETCH_PLAYER_NAMES, FETCH_BOARD_SPACES, PUBLISH_BOARD_SPACES } from './event-types.js';
 import PubSub from 'pubsub-js';
 
-export class displayController {
+export class DisplayController {
     constructor (board1El, player1NameEl, board2El, player2NameEl) {
-        this.boardDisplay1 = new boardDisplay(board1El, player1NameEl);
-        this.boardDisplay2 = new boardDisplay(board2El, player2NameEl);
+        this.boardDisplay1 = new BoardDisplay(board1El, player1NameEl);
+        this.boardDisplay2 = new BoardDisplay(board2El, player2NameEl);
         this.boardDisplays = [this.boardDisplay1, this.boardDisplay2];
         PubSub.publish(FETCH_PLAYER_NAMES);
         PubSub.publish(FETCH_BOARD_SPACES);
@@ -30,7 +30,7 @@ export class displayController {
 
 }
 
-class boardDisplay {
+class BoardDisplay {
     constructor (boardEl, playerNameEl) {
         this.boardEl = boardEl;
         this.playerNameEl = playerNameEl;
