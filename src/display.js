@@ -14,24 +14,8 @@ export class displayController {
     }
 
     refreshBoards = (function (msg, boardSpaces) {
-        //TODO: allow to refresh a single board depending on the data sent
-        for (let spaces of boardSpaces) {
-            let current = boardSpaces.indexOf(spaces);
-            for (let rowX of spaces) {
-                for (let gameSpace of rowX) {
-                    let displayedSpace = this.boardDisplays[current].spaces[gameSpace.x][gameSpace.y];
-                    //TODO: hidden spaces
-                    if (gameSpace.ship) {
-                        displayedSpace.classList.add('space-ship');
-                    }
-                    if (gameSpace.isHit) {
-                        displayedSpace.textContent = 'X';
-                    }
-                    if (!gameSpace.ship && !gameSpace.isHit) {
-                        displayedSpace.classList.add('space-empty');
-                    }
-                }
-            }
+        for (let spacesObj of boardSpaces) {
+            this.boardDisplays[spacesObj.id].refreshSpaces(spacesObj);
         }
     }).bind(this);
     refreshBoardsToken = PubSub.subscribe(PUBLISH_BOARD_SPACES, this.refreshBoards);
@@ -79,5 +63,26 @@ class boardDisplay {
                 this.boardEl.append(spaceEl);
             }
         } 
+    }
+
+    refreshSpaces (gameSpacesObj) {
+        for (let rowX of gameSpacesObj.spaces) {
+            for (let gameSpace of rowX) {
+                let displayedSpace = this.spaces[gameSpace.x][gameSpace.y];
+                if (gameSpacesObj.id === 1 && !gameSpace.isHit) {
+                    displayedSpace.classList.add('space-hidden');
+                } else {
+                    if (gameSpace.ship) {
+                    displayedSpace.classList.add('space-ship');    
+                    }
+                    if (gameSpace.isHit) {
+                        displayedSpace.textContent = 'X';
+                    }
+                    if (!gameSpace.ship) {
+                        displayedSpace.classList.add('space-empty');
+                    }
+                }
+            }
+        }
     }
 }
