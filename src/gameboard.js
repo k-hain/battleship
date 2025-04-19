@@ -48,25 +48,26 @@ export class Gameboard {
 
     placeShip (ship, x, y) {
         if (
-            this.validateShipPlacement(ship.length, x, y, ship.isHorizontal)
+            this.validateShipPlacement(ship, x, y)
         ) {
             ship.x = x;
             ship.y = y;
 
             for (let i = 0; i < ship.length; i++) {
-                let [iH, iV] = this.setShipDrawDirection(ship.isHorizontal, i);
-                this.spaces[x+iH][y+iV].ship = ship;
+                const [currX, currY] = this.getShipSegmentCoords(ship.x, ship.y, ship.isHorizontal, i);
+                
+                this.spaces[currX][currY].ship = ship;
             }
 
             this.addLockedArea(ship);
         }
     }
 
-    validateShipPlacement (length, x, y, isHorizontal) {
-        for (let i = 0; i < length; i++) {
-            let [iH, iV] = this.setShipDrawDirection(isHorizontal, i);
+    validateShipPlacement (ship, x, y) {
+        for (let i = 0; i < ship.length; i++) {
+            const [currX, currY] = this.getShipSegmentCoords(x, y, ship.isHorizontal, i);
 
-            if (this.spaces[x+iH][y+iV].ship || this.spaces[x+iH][y+iV].isLocked) {
+            if (this.spaces[currX][currY].ship || this.spaces[currX][currY].isLocked) {
                 return false;
             }
         }
@@ -95,15 +96,8 @@ export class Gameboard {
     forEachSpaceAround (ship, callback) {
         for (let i = -1; i < ship.length + 1; i++) {
             const targetSpaces = [];
-            let currX, currY;
 
-            if (ship.isHorizontal) {
-                currX = ship.x + i;
-                currY = ship.y;
-            } else {
-                currX = ship.x;
-                currY = ship.y + i;
-            }
+            const [currX, currY] = this.getShipSegmentCoords(ship.x, ship.y, ship.isHorizontal, i);
 
             if (ship.isHorizontal) {
                 targetSpaces.push({x: currX, y: currY + 1}, {x: currX, y: currY - 1});
@@ -120,6 +114,20 @@ export class Gameboard {
                 }      
             }
         }
+    }
+
+    getShipSegmentCoords (x, y, isHorizontal, offset) {
+        let newX, newY;
+
+        if (isHorizontal) {
+            newX = x + offset;
+            newY = y;
+        } else {
+            newX = x;
+            newY = y + offset;
+        }
+
+        return [newX, newY];
     }
 
     addLockedArea (ship) {
@@ -143,13 +151,5 @@ export class Gameboard {
             }
         }
         return true;
-    }
-
-    setShipDrawDirection (isHorizontal, i) {
-        if (isHorizontal) {
-            return [i, 0];
-        } else {
-            return [0, i];
-        }
     }
 }
