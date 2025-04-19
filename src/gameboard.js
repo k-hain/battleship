@@ -118,6 +118,32 @@ export class Gameboard {
         }
     }
 
+    addHitsAround (ship) {
+        for (let i = -1; i < ship.length + 1; i++) {
+            let [iH, iV] = this.setShipDrawDirection(ship.isHorizontal, i);
+            let [offsetH, offsetV] = this.setShipDrawDirectionOffset(ship.isHorizontal);
+
+            if (
+                this.checkBounds([ship.x+iH+offsetH, ship.y+iV+offsetV])
+            ) {
+                this.spaces[ship.x+iH+offsetH][ship.y+iV+offsetV].isHit = true;
+            }
+            if (
+                this.checkBounds([ship.x+iH-offsetH, ship.y+iV-offsetV])
+            ) {
+               this.spaces[ship.x+iH-offsetH][ship.y+iV-offsetV].isHit = true; 
+            }
+        
+            if (i === -1 || i === ship.length) {
+                if (
+                    this.checkBounds([ship.x+iH, ship.y+iV])
+                ) {
+                    this.spaces[ship.x+iH][ship.y+iV].isHit = true;
+                }       
+            }
+        }
+    }
+
     checkBounds (values) {
         for (let value of values) {
             if (value >= BOARD_WIDTH || value < 0) {

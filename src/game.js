@@ -100,6 +100,13 @@ export class Game {
 
         target.board.receiveAttack(obj.x, obj.y);
 
+        const targetShip = target.board.spaces[obj.x][obj.y].ship;
+        if (targetShip) {
+            if (targetShip.isSunk()) {
+                target.board.addHitsAround(targetShip);
+            }   
+        }
+
         PubSub.publish(PUBLISH_BOARD_SPACES, [
             {
                 id: target.id,
