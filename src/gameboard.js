@@ -152,12 +152,4 @@ export class Gameboard {
             return [0, i];
         }
     }
-
-    setShipDrawDirectionOffset (isHorizontal) {
-        if (isHorizontal) {
-            return [0, 1];
-        } else {
-            return [1, 0];
-        }
-    }
 }
