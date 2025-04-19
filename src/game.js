@@ -1,48 +1,96 @@
 import { Player } from './player.js';
-import { PUBLISH_PLAYER_NAMES, FETCH_PLAYER_NAMES, FETCH_BOARD_SPACES, PUBLISH_BOARD_SPACES, START_PLAYER_ROUND, ATTACK_SPACE } from './event-types.js';
+import {
+    PUBLISH_PLAYER_NAMES,
+    FETCH_PLAYER_NAMES,
+    FETCH_BOARD_SPACES,
+    PUBLISH_BOARD_SPACES,
+    START_PLAYER_ROUND,
+    ATTACK_SPACE,
+} from './event-types.js';
+import { getRandomInt, forEachSpace } from './helpers.js';
+import { BOARD_WIDTH } from './gameboard.js';
 import PubSub from 'pubsub-js';
 
 export class Game {
-    constructor () {
+    constructor() {
         this.player1 = new Player(0, 'Player', true);
         this.player2 = new Player(1, 'Computer', false);
         this.player1.board.setupShips();
         this.player2.board.setupShips();
-        this.currentPlayer = this.player1;
+        this.currentPlayer = this.player2;
     }
 
-    publishPlayerNames = (function () {
-        PubSub.publish(PUBLISH_PLAYER_NAMES, [this.player1.name, this.player2.name]);
-    }).bind(this);
-    publishPlayerNamesToken = PubSub.subscribe(FETCH_PLAYER_NAMES, this.publishPlayerNames);
+    publishPlayerNames = function () {
+        PubSub.publish(PUBLISH_PLAYER_NAMES, [
+            this.player1.name,
+            this.player2.name,
+        ]);
+    }.bind(this);
+    publishPlayerNamesToken = PubSub.subscribe(
+        FETCH_PLAYER_NAMES,
+        this.publishPlayerNames
+    );
 
-    publishBoardSpaces = (function () {
-        PubSub.publish(PUBLISH_BOARD_SPACES, [{
-            id: this.player1.id,
-            spaces: this.player1.board.spaces
-        }, {
-            id: this.player2.id,
-            spaces: this.player2.board.spaces
-        }])
-    }).bind(this);
-    publishBoardSpacesToken = PubSub.subscribe(FETCH_BOARD_SPACES,this.publishBoardSpaces);
+    publishBoardSpaces = function () {
+        PubSub.publish(PUBLISH_BOARD_SPACES, [
+            {
+                id: this.player1.id,
+                spaces: this.player1.board.spaces,
+            },
+            {
+                id: this.player2.id,
+                spaces: this.player2.board.spaces,
+            },
+        ]);
+    }.bind(this);
+    publishBoardSpacesToken = PubSub.subscribe(
+        FETCH_BOARD_SPACES,
+        this.publishBoardSpaces
+    );
 
-    startRound () {
-        //switch currentPlayer
+    startRound() {
+        this.switchPlayers();
 
         if (this.currentPlayer === this.player1) {
             PubSub.publish(START_PLAYER_ROUND, {
                 id: this.player2.id,
-                spaces: this.player2.board.spaces
-            })
+                spaces: this.player2.board.spaces,
+            });
         } else {
-            //play computer's round
-        }    
+            this.makeComputerMove();
+        }
     }
 
-    resolveAttack = (function (msg, obj) {
+    switchPlayers() {
+        if (this.currentPlayer === this.player1) {
+            this.currentPlayer = this.player2;
+        } else {
+            this.currentPlayer = this.player1;
+        }
+    }
+
+    makeComputerMove() {
+        const target = this.getLegalTarget(this.player1.board.spaces);
+        PubSub.publish(ATTACK_SPACE, {id: 0, x: target.x, y: target.y});
+    }
+
+    getLegalTarget (spaces) {
+        let targets = [];
+
+        forEachSpace(spaces, (space) => {
+            if (!space.isHit) {
+                targets.push(space);
+            }
+        });
+
+        let target = targets[getRandomInt(targets.length)];
+
+        return {x: target.x, y: target.y};
+    }
+
+    resolveAttack = function (msg, obj) {
         let target;
-        
+
         if (obj.id === 0) {
             target = this.player1;
         } else {
@@ -50,12 +98,15 @@ export class Game {
         }
 
         target.board.receiveAttack(obj.x, obj.y);
+        
+        PubSub.publish(PUBLISH_BOARD_SPACES, [
+            {
+                id: target.id,
+                spaces: target.board.spaces,
+            },
+        ]);
 
-        PubSub.publish(PUBLISH_BOARD_SPACES, [{
-            id: target.id,
-            spaces: target.board.spaces
-        }]);
         this.startRound();
-    }).bind(this);
+    }.bind(this);
     resolveAttackToken = PubSub.subscribe(ATTACK_SPACE, this.resolveAttack);
 }

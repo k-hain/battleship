@@ -65,6 +65,8 @@ class BoardDisplay {
                 spaceEl.style.gridColumn = `${x+1} / span 1`;
                 //spaceEl.textContent = `${x}, ${y}`;
                 spaceEl.classList.add('space');
+                spaceEl.x = x;
+                spaceEl.y = y;
                 this.boardEl.append(spaceEl);
             }
         } 
@@ -81,19 +83,19 @@ class BoardDisplay {
     refreshSpaces (gameSpacesObj) {
         for (let rowX of gameSpacesObj.spaces) {
             for (let gameSpace of rowX) {
-                let displayedSpace = this.spaces[gameSpace.x][gameSpace.y];
-                displayedSpace.className = 'space';
+                let spaceEl = this.spaces[gameSpace.x][gameSpace.y];
+                spaceEl.className = 'space';
                 if (gameSpacesObj.id === 1 && !gameSpace.isHit) {
-                    displayedSpace.classList.add('space-hidden');
+                    spaceEl.classList.add('space-hidden');
                 } else {
                     if (gameSpace.ship) {
-                        displayedSpace.classList.add('space-ship');    
+                        spaceEl.classList.add('space-ship');    
                     }
                     if (gameSpace.isHit) {
-                        displayedSpace.textContent = 'X';
+                        spaceEl.textContent = 'X';
                     }
                     if (!gameSpace.ship) {
-                        displayedSpace.classList.add('space-empty');
+                        spaceEl.classList.add('space-empty');
                     }
                 }
             }
@@ -102,14 +104,23 @@ class BoardDisplay {
 
     makeActive (obj) {
         this.forEachSpace(obj.spaces, (gameSpace) => {
-            const displayedSpace = this.spaces[gameSpace.x][gameSpace.y];
+            const spaceEl = this.spaces[gameSpace.x][gameSpace.y];
             if (!gameSpace.isHit) {
-                displayedSpace.classList.add('space-interactive');
-                displayedSpace.addEventListener('click', () => {
-                    //alert(`clicked (${gameSpace.x}, ${gameSpace.y})`);
-                    PubSub.publish(ATTACK_SPACE, {id: obj.id, x: gameSpace.x, y: gameSpace.y});
-                })
+                spaceEl.classList.add('space-interactive');
+                spaceEl.addEventListener('click', this.makeAttack);
             }
         });
     }
+
+    makeAttack = (function (event) {
+        this.clearEventListeners();
+        PubSub.publish(ATTACK_SPACE, {id: this.id, x: event.currentTarget.x, y: event.currentTarget.y}); 
+    }).bind(this);
+
+    clearEventListeners = (function () {
+        this.forEachSpace(this.spaces, (space) => {
+            space.classList.remove('space-interactive');
+            space.removeEventListener('click', this.makeAttack);
+        });
+    }).bind(this);
 }
