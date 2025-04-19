@@ -92,7 +92,7 @@ export class Gameboard {
         return true;
     }
 
-    addLockedArea (ship) {
+    forEachSpaceAround (ship, callback) {
         for (let i = -1; i < ship.length + 1; i++) {
             let [iH, iV] = this.setShipDrawDirection(ship.isHorizontal, i);
             let [offsetH, offsetV] = this.setShipDrawDirectionOffset(ship.isHorizontal);
@@ -100,48 +100,36 @@ export class Gameboard {
             if (
                 this.checkBounds([ship.x+iH+offsetH, ship.y+iV+offsetV])
             ) {
-                this.spaces[ship.x+iH+offsetH][ship.y+iV+offsetV].isLocked = true;
+                callback(this.spaces[ship.x+iH+offsetH][ship.y+iV+offsetV]);
             }
             if (
                 this.checkBounds([ship.x+iH-offsetH, ship.y+iV-offsetV])
             ) {
-               this.spaces[ship.x+iH-offsetH][ship.y+iV-offsetV].isLocked = true; 
+               callback(this.spaces[ship.x+iH-offsetH][ship.y+iV-offsetV]); 
             }
         
             if (i === -1 || i === ship.length) {
                 if (
                     this.checkBounds([ship.x+iH, ship.y+iV])
                 ) {
-                    this.spaces[ship.x+iH][ship.y+iV].isLocked = true;
+                    callback(this.spaces[ship.x+iH][ship.y+iV]);
                 }       
             }
         }
     }
 
-    addHitsAround (ship) {
-        for (let i = -1; i < ship.length + 1; i++) {
-            let [iH, iV] = this.setShipDrawDirection(ship.isHorizontal, i);
-            let [offsetH, offsetV] = this.setShipDrawDirectionOffset(ship.isHorizontal);
+    addLockedArea (ship) {
+        this.forEachSpaceAround(ship, (space) => {
+            space.isLocked = true;
+        });
+    }
 
-            if (
-                this.checkBounds([ship.x+iH+offsetH, ship.y+iV+offsetV])
-            ) {
-                this.spaces[ship.x+iH+offsetH][ship.y+iV+offsetV].isHit = true;
-            }
-            if (
-                this.checkBounds([ship.x+iH-offsetH, ship.y+iV-offsetV])
-            ) {
-               this.spaces[ship.x+iH-offsetH][ship.y+iV-offsetV].isHit = true; 
-            }
-        
-            if (i === -1 || i === ship.length) {
-                if (
-                    this.checkBounds([ship.x+iH, ship.y+iV])
-                ) {
-                    this.spaces[ship.x+iH][ship.y+iV].isHit = true;
-                }       
-            }
-        }
+    addHitsAround (ship) {
+        this.forEachSpaceAround(ship, (space) => {
+            if (!space.isHit) {
+                space.isHit = true;
+            }  
+        });
     }
 
     checkBounds (values) {
