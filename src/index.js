@@ -12,3 +12,7 @@ const player1NameEl = document.getElementById('player1-name');
 const player2NameEl = document.getElementById('player2-name');
 
 const display = new DisplayController(board1El, player1NameEl, board2El, player2NameEl);
+
+setTimeout(() => {
+    game.startRound();
+}, 100);

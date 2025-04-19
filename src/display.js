@@ -1,13 +1,13 @@
 /* global document */
 
 import { BOARD_WIDTH } from './gameboard.js';
-import { PUBLISH_PLAYER_NAMES, FETCH_PLAYER_NAMES, FETCH_BOARD_SPACES, PUBLISH_BOARD_SPACES } from './event-types.js';
+import { PUBLISH_PLAYER_NAMES, FETCH_PLAYER_NAMES, FETCH_BOARD_SPACES, PUBLISH_BOARD_SPACES, START_PLAYER_ROUND, ATTACK_SPACE } from './event-types.js';
 import PubSub from 'pubsub-js';
 
 export class DisplayController {
     constructor (board1El, player1NameEl, board2El, player2NameEl) {
-        this.boardDisplay1 = new BoardDisplay(board1El, player1NameEl);
-        this.boardDisplay2 = new BoardDisplay(board2El, player2NameEl);
+        this.boardDisplay1 = new BoardDisplay(board1El, player1NameEl, 0);
+        this.boardDisplay2 = new BoardDisplay(board2El, player2NameEl, 1);
         this.boardDisplays = [this.boardDisplay1, this.boardDisplay2];
         PubSub.publish(FETCH_PLAYER_NAMES);
         PubSub.publish(FETCH_BOARD_SPACES);
@@ -28,10 +28,15 @@ export class DisplayController {
     }).bind(this);
     printPlayerNamesToken = PubSub.subscribe(PUBLISH_PLAYER_NAMES, this.printPlayerNames);
 
+    setActiveBoard = (function (msg, obj) {
+        this.boardDisplays[obj.id].makeActive(obj);
+    }).bind(this);
+    setActiveBoardToken = PubSub.subscribe(START_PLAYER_ROUND, this.setActiveBoard);
 }
 
 class BoardDisplay {
-    constructor (boardEl, playerNameEl) {
+    constructor (boardEl, playerNameEl, id) {
+        this.id = id;
         this.boardEl = boardEl;
         this.playerNameEl = playerNameEl;
         this.playerNameEl.textContent = 'Name';
@@ -65,15 +70,24 @@ class BoardDisplay {
         } 
     }
 
+    forEachSpace (spacesArr, callback) {
+        for (let rowX of spacesArr) {
+            for (let gameSpace of rowX) {
+                callback(gameSpace);
+            }
+        }
+    }
+
     refreshSpaces (gameSpacesObj) {
         for (let rowX of gameSpacesObj.spaces) {
             for (let gameSpace of rowX) {
                 let displayedSpace = this.spaces[gameSpace.x][gameSpace.y];
+                displayedSpace.className = 'space';
                 if (gameSpacesObj.id === 1 && !gameSpace.isHit) {
                     displayedSpace.classList.add('space-hidden');
                 } else {
                     if (gameSpace.ship) {
-                    displayedSpace.classList.add('space-ship');    
+                        displayedSpace.classList.add('space-ship');    
                     }
                     if (gameSpace.isHit) {
                         displayedSpace.textContent = 'X';
@@ -84,5 +98,18 @@ class BoardDisplay {
                 }
             }
         }
+    }
+
+    makeActive (obj) {
+        this.forEachSpace(obj.spaces, (gameSpace) => {
+            const displayedSpace = this.spaces[gameSpace.x][gameSpace.y];
+            if (!gameSpace.isHit) {
+                displayedSpace.classList.add('space-interactive');
+                displayedSpace.addEventListener('click', () => {
+                    //alert(`clicked (${gameSpace.x}, ${gameSpace.y})`);
+                    PubSub.publish(ATTACK_SPACE, {id: obj.id, x: gameSpace.x, y: gameSpace.y});
+                })
+            }
+        });
     }
 }
