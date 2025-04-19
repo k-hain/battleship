@@ -89,26 +89,24 @@ class BoardDisplay {
         }
     }
 
-    refreshSpaces(gameSpacesObj) {
-        for (let rowX of gameSpacesObj.spaces) {
-            for (let gameSpace of rowX) {
-                let spaceEl = this.spaces[gameSpace.x][gameSpace.y];
-                spaceEl.className = 'space';
-                if (gameSpacesObj.id === 1 && !gameSpace.isHit) {
-                    spaceEl.classList.add('space-hidden');
-                } else {
-                    if (gameSpace.ship) {
-                        spaceEl.classList.add('space-ship');
-                    }
-                    if (gameSpace.isHit) {
-                        spaceEl.textContent = 'X';
-                    }
-                    if (!gameSpace.ship) {
-                        spaceEl.classList.add('space-empty');
-                    }
+    refreshSpaces(spacesObj) {
+        forEachSpace(spacesObj.spaces, (gameSpace) => {
+            let spaceEl = this.spaces[gameSpace.x][gameSpace.y];
+            spaceEl.className = 'space';
+            if (spacesObj.id === 1 && !gameSpace.isHit) {
+                spaceEl.classList.add('space-hidden');
+            } else {
+                if (gameSpace.ship) {
+                    spaceEl.classList.add('space-ship');
+                }
+                if (gameSpace.isHit) {
+                    spaceEl.textContent = 'X';
+                }
+                if (!gameSpace.ship) {
+                    spaceEl.classList.add('space-empty');
                 }
             }
-        }
+        });
     }
 
     makeActive(obj) {
