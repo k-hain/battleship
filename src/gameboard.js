@@ -94,26 +94,30 @@ export class Gameboard {
 
     forEachSpaceAround (ship, callback) {
         for (let i = -1; i < ship.length + 1; i++) {
-            let [iH, iV] = this.setShipDrawDirection(ship.isHorizontal, i);
-            let [offsetH, offsetV] = this.setShipDrawDirectionOffset(ship.isHorizontal);
+            const targetSpaces = [];
+            let currX, currY;
 
-            if (
-                this.checkBounds([ship.x+iH+offsetH, ship.y+iV+offsetV])
-            ) {
-                callback(this.spaces[ship.x+iH+offsetH][ship.y+iV+offsetV]);
+            if (ship.isHorizontal) {
+                currX = ship.x + i;
+                currY = ship.y;
+            } else {
+                currX = ship.x;
+                currY = ship.y + i;
             }
-            if (
-                this.checkBounds([ship.x+iH-offsetH, ship.y+iV-offsetV])
-            ) {
-               callback(this.spaces[ship.x+iH-offsetH][ship.y+iV-offsetV]); 
+
+            if (ship.isHorizontal) {
+                targetSpaces.push({x: currX, y: currY + 1}, {x: currX, y: currY - 1});
+            } else {
+                targetSpaces.push({x: currX + 1, y: currY}, {x: currX - 1, y: currY});
             }
-        
             if (i === -1 || i === ship.length) {
-                if (
-                    this.checkBounds([ship.x+iH, ship.y+iV])
-                ) {
-                    callback(this.spaces[ship.x+iH][ship.y+iV]);
-                }       
+                targetSpaces.push({x: currX, y: currY});
+            }
+
+            for (let coords of targetSpaces) {
+                if (this.checkBounds([coords.x, coords.y])) {
+                    callback(this.spaces[coords.x][coords.y]); 
+                }      
             }
         }
     }
