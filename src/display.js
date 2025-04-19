@@ -1,11 +1,19 @@
 /* global document */
 
 import { BOARD_WIDTH } from './gameboard.js';
-import { PUBLISH_PLAYER_NAMES, FETCH_PLAYER_NAMES, FETCH_BOARD_SPACES, PUBLISH_BOARD_SPACES, START_PLAYER_ROUND, ATTACK_SPACE } from './event-types.js';
+import {
+    PUBLISH_PLAYER_NAMES,
+    FETCH_PLAYER_NAMES,
+    FETCH_BOARD_SPACES,
+    PUBLISH_BOARD_SPACES,
+    START_PLAYER_ROUND,
+    ATTACK_SPACE,
+} from './event-types.js';
+import { forEachSpace } from './helpers.js';
 import PubSub from 'pubsub-js';
 
 export class DisplayController {
-    constructor (board1El, player1NameEl, board2El, player2NameEl) {
+    constructor(board1El, player1NameEl, board2El, player2NameEl) {
         this.boardDisplay1 = new BoardDisplay(board1El, player1NameEl, 0);
         this.boardDisplay2 = new BoardDisplay(board2El, player2NameEl, 1);
         this.boardDisplays = [this.boardDisplay1, this.boardDisplay2];
@@ -13,29 +21,38 @@ export class DisplayController {
         PubSub.publish(FETCH_BOARD_SPACES);
     }
 
-    refreshBoards = (function (msg, boardSpaces) {
+    refreshBoards = function (msg, boardSpaces) {
         for (let spacesObj of boardSpaces) {
             this.boardDisplays[spacesObj.id].refreshSpaces(spacesObj);
         }
-    }).bind(this);
-    refreshBoardsToken = PubSub.subscribe(PUBLISH_BOARD_SPACES, this.refreshBoards);
+    }.bind(this);
+    refreshBoardsToken = PubSub.subscribe(
+        PUBLISH_BOARD_SPACES,
+        this.refreshBoards
+    );
 
-    printPlayerNames = (function (msg, playerNames) {
+    printPlayerNames = function (msg, playerNames) {
         for (let name of playerNames) {
             let current = playerNames.indexOf(name);
-            this.boardDisplays[current].setPlayerName(name); 
+            this.boardDisplays[current].setPlayerName(name);
         }
-    }).bind(this);
-    printPlayerNamesToken = PubSub.subscribe(PUBLISH_PLAYER_NAMES, this.printPlayerNames);
+    }.bind(this);
+    printPlayerNamesToken = PubSub.subscribe(
+        PUBLISH_PLAYER_NAMES,
+        this.printPlayerNames
+    );
 
-    setActiveBoard = (function (msg, obj) {
+    setActiveBoard = function (msg, obj) {
         this.boardDisplays[obj.id].makeActive(obj);
-    }).bind(this);
-    setActiveBoardToken = PubSub.subscribe(START_PLAYER_ROUND, this.setActiveBoard);
+    }.bind(this);
+    setActiveBoardToken = PubSub.subscribe(
+        START_PLAYER_ROUND,
+        this.setActiveBoard
+    );
 }
 
 class BoardDisplay {
-    constructor (boardEl, playerNameEl, id) {
+    constructor(boardEl, playerNameEl, id) {
         this.id = id;
         this.boardEl = boardEl;
         this.playerNameEl = playerNameEl;
@@ -44,43 +61,35 @@ class BoardDisplay {
         this.initDisplay();
     }
 
-    initDisplay () {
+    initDisplay() {
         this.boardEl.style.gridTemplateRows = `repeat(${BOARD_WIDTH}, 1fr)`;
         this.boardEl.style.gridTemplateColmuns = `repeat(${BOARD_WIDTH}, 1fr)`;
         this.createSpaces();
     }
 
-    setPlayerName (name) {
+    setPlayerName(name) {
         this.playerNameEl.textContent = name;
     }
 
-    createSpaces () {
-       for (let x = 0; x < BOARD_WIDTH; x++) {
+    createSpaces() {
+        for (let x = 0; x < BOARD_WIDTH; x++) {
             this.spaces.push(new Array());
-        
+
             for (let y = 0; y < BOARD_WIDTH; y++) {
                 const spaceEl = document.createElement('div');
                 this.spaces[x].push(spaceEl);
-                spaceEl.style.gridRow = `${y+1} / span 1`;
-                spaceEl.style.gridColumn = `${x+1} / span 1`;
+                spaceEl.style.gridRow = `${y + 1} / span 1`;
+                spaceEl.style.gridColumn = `${x + 1} / span 1`;
                 //spaceEl.textContent = `${x}, ${y}`;
                 spaceEl.classList.add('space');
                 spaceEl.x = x;
                 spaceEl.y = y;
                 this.boardEl.append(spaceEl);
             }
-        } 
-    }
-
-    forEachSpace (spacesArr, callback) {
-        for (let rowX of spacesArr) {
-            for (let gameSpace of rowX) {
-                callback(gameSpace);
-            }
         }
     }
 
-    refreshSpaces (gameSpacesObj) {
+    refreshSpaces(gameSpacesObj) {
         for (let rowX of gameSpacesObj.spaces) {
             for (let gameSpace of rowX) {
                 let spaceEl = this.spaces[gameSpace.x][gameSpace.y];
@@ -89,7 +98,7 @@ class BoardDisplay {
                     spaceEl.classList.add('space-hidden');
                 } else {
                     if (gameSpace.ship) {
-                        spaceEl.classList.add('space-ship');    
+                        spaceEl.classList.add('space-ship');
                     }
                     if (gameSpace.isHit) {
                         spaceEl.textContent = 'X';
@@ -102,8 +111,8 @@ class BoardDisplay {
         }
     }
 
-    makeActive (obj) {
-        this.forEachSpace(obj.spaces, (gameSpace) => {
+    makeActive(obj) {
+        forEachSpace(obj.spaces, (gameSpace) => {
             const spaceEl = this.spaces[gameSpace.x][gameSpace.y];
             if (!gameSpace.isHit) {
                 spaceEl.classList.add('space-interactive');
@@ -112,15 +121,19 @@ class BoardDisplay {
         });
     }
 
-    makeAttack = (function (event) {
+    makeAttack = function (event) {
         this.clearEventListeners();
-        PubSub.publish(ATTACK_SPACE, {id: this.id, x: event.currentTarget.x, y: event.currentTarget.y}); 
-    }).bind(this);
+        PubSub.publish(ATTACK_SPACE, {
+            id: this.id,
+            x: event.currentTarget.x,
+            y: event.currentTarget.y,
+        });
+    }.bind(this);
 
-    clearEventListeners = (function () {
-        this.forEachSpace(this.spaces, (space) => {
+    clearEventListeners = function () {
+        forEachSpace(this.spaces, (space) => {
             space.classList.remove('space-interactive');
             space.removeEventListener('click', this.makeAttack);
         });
-    }).bind(this);
+    }.bind(this);
 }
