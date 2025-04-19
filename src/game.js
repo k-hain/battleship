@@ -1,3 +1,5 @@
+/* global alert */
+
 import { Player } from './player.js';
 import {
     PUBLISH_PLAYER_NAMES,
@@ -70,10 +72,10 @@ export class Game {
 
     makeComputerMove() {
         const target = this.getLegalTarget(this.player1.board.spaces);
-        PubSub.publish(ATTACK_SPACE, {id: 0, x: target.x, y: target.y});
+        PubSub.publish(ATTACK_SPACE, { id: 0, x: target.x, y: target.y });
     }
 
-    getLegalTarget (spaces) {
+    getLegalTarget(spaces) {
         let targets = [];
 
         forEachSpace(spaces, (space) => {
@@ -84,7 +86,7 @@ export class Game {
 
         let target = targets[getRandomInt(targets.length)];
 
-        return {x: target.x, y: target.y};
+        return { x: target.x, y: target.y };
     }
 
     resolveAttack = function (msg, obj) {
@@ -97,7 +99,7 @@ export class Game {
         }
 
         target.board.receiveAttack(obj.x, obj.y);
-        
+
         PubSub.publish(PUBLISH_BOARD_SPACES, [
             {
                 id: target.id,
@@ -105,7 +107,17 @@ export class Game {
             },
         ]);
 
-        this.startRound();
+        this.checkGameEnd();
     }.bind(this);
     resolveAttackToken = PubSub.subscribe(ATTACK_SPACE, this.resolveAttack);
+
+    checkGameEnd() {
+        if (this.player1.board.checkAllSunk()) {
+            alert(`${this.player2.name} wins!`);
+        } else if (this.player2.board.checkAllSunk()) {
+            alert(`${this.player1.name} wins!`);
+        } else {
+            this.startRound();
+        }
+    }
 }
