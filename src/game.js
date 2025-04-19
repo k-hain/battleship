@@ -8,7 +8,6 @@ import {
     ATTACK_SPACE,
 } from './event-types.js';
 import { getRandomInt, forEachSpace } from './helpers.js';
-import { BOARD_WIDTH } from './gameboard.js';
 import PubSub from 'pubsub-js';
 
 export class Game {
