@@ -8,6 +8,8 @@ import {
     PUBLISH_BOARD_SPACES,
     START_PLAYER_ROUND,
     ATTACK_SPACE,
+    START_PLAYER_SETUP,
+    START_GAME,
 } from './event-types.js';
 import { getRandomInt, forEachSpace } from './helpers.js';
 import PubSub from 'pubsub-js';
@@ -16,9 +18,7 @@ export class Game {
     constructor() {
         this.player1 = new Player(0, 'Player', true);
         this.player2 = new Player(1, 'Computer', false);
-        this.player1.board.setupShips();
-        this.player2.board.setupShips();
-        this.currentPlayer = this.player2;
+        this.currentPlayer = this.player1;
     }
 
     publishPlayerNames = function () {
@@ -49,8 +49,29 @@ export class Game {
         this.publishBoardSpaces
     );
 
+    startSetup() {
+        this.makeInitialShipSetup();
+        PubSub.publish(START_PLAYER_SETUP);
+    }
+
+    makeInitialShipSetup() {
+        for (let player of [this.player1, this.player2]) {
+            player.board.setupShips();
+            PubSub.publish(PUBLISH_BOARD_SPACES, [{
+                id: player.id,
+                spaces: player.board.spaces,
+            }]);
+        }
+    }
+
+    startGame = function () {
+        //determine starting player
+        this.startRound();
+    }.bind(this);
+    startGameToken = PubSub.subscribe(START_GAME, this.startGame);
+
     startRound() {
-        this.switchPlayers();
+        //this.switchPlayers();
 
         if (this.currentPlayer === this.player1) {
             PubSub.publish(START_PLAYER_ROUND, {
@@ -104,7 +125,7 @@ export class Game {
         if (targetShip) {
             if (targetShip.isSunk()) {
                 target.board.addHitsAround(targetShip);
-            }   
+            }
         }
 
         PubSub.publish(PUBLISH_BOARD_SPACES, [
@@ -124,6 +145,7 @@ export class Game {
         } else if (this.player2.board.checkAllSunk()) {
             alert(`${this.player1.name} wins!`);
         } else {
+            this.switchPlayers();
             this.startRound();
         }
     }

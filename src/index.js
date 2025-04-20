@@ -20,5 +20,5 @@ const display = new DisplayController(
 );
 
 setTimeout(() => {
-    game.startRound();
+    game.startSetup();
 }, 100);

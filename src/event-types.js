@@ -4,3 +4,5 @@ export const PUBLISH_BOARD_SPACES = Symbol('PUBLISH_BOARD_SPACES');
 export const FETCH_BOARD_SPACES = Symbol('FETCH_BOARD_SPACES');
 export const START_PLAYER_ROUND = Symbol('START_PLAYER_ROUND');
 export const ATTACK_SPACE = Symbol('ATTACK_SPACE');
+export const START_PLAYER_SETUP = Symbol('START_PLAYER_SETUP');
+export const START_GAME = Symbol('START_GAME');

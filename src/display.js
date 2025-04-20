@@ -8,6 +8,8 @@ import {
     PUBLISH_BOARD_SPACES,
     START_PLAYER_ROUND,
     ATTACK_SPACE,
+    START_PLAYER_SETUP,
+    START_GAME,
 } from './event-types.js';
 import { forEachSpace } from './helpers.js';
 import PubSub from 'pubsub-js';
@@ -49,6 +51,27 @@ export class DisplayController {
         START_PLAYER_ROUND,
         this.setActiveBoard
     );
+
+    startBoardSetup = function (msg) {
+        const infoWrapperEl = document.querySelector('.info-wrapper');
+
+        const infoEl = document.createElement('div');
+        infoEl.classList.add('info');
+        infoEl.textContent = 'Arrange your ships on the board';
+        infoWrapperEl.appendChild(infoEl);
+
+        const startButtonEl = document.createElement('button');
+        startButtonEl.classList.add('start-btn')
+        startButtonEl.textContent = 'Start Game';
+        infoWrapperEl.appendChild(startButtonEl);
+
+        startButtonEl.addEventListener('click', () => {
+            startButtonEl.remove();
+            infoEl.remove();
+            PubSub.publish(START_GAME);
+        });
+    }
+    startBoardSetupToken = PubSub.subscribe(START_PLAYER_SETUP, this.startBoardSetup);
 }
 
 class BoardDisplay {
