@@ -112,7 +112,7 @@ export class Gameboard {
 
     rotateShip(targetShip) {
         const x = targetShip.x;
-        const y = targetShip.y
+        const y = targetShip.y;
 
         this.removeShip(targetShip);
 
@@ -123,6 +123,7 @@ export class Gameboard {
         }
 
         const rotated = this.placeShip(targetShip, x, y);
+
         if (!rotated) {
             if (targetShip.isHorizontal) {
                 targetShip.isHorizontal = false;
@@ -130,6 +131,19 @@ export class Gameboard {
                 targetShip.isHorizontal = true;
             }
 
+            this.placeShip(targetShip, x, y);
+        }
+    }
+
+    moveShip(targetShip, newX, newY) {
+        const x = targetShip.x;
+        const y = targetShip.y;
+
+        this.removeShip(targetShip);
+
+        const moved = this.placeShip(targetShip, newX, newY);
+        
+        if (!moved) {
             this.placeShip(targetShip, x, y);
         }
     }

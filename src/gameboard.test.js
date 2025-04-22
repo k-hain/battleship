@@ -71,6 +71,24 @@ test('Rotate ship on an invalid space', () => {
     expect(board.spaces[0][1].ship).toBeNull();
 });
 
+test('Move ship', () => {
+    const board = new Gameboard();
+    board.placeShip(board.ships[3], 0, 0);
+    board.moveShip(board.spaces[0][0].ship, 0, 2);
+    expect(board.spaces[0][2].ship).toEqual(board.ships[3]);
+});
+
+test('Move on an invalid space', () => {
+    const board = new Gameboard();
+    board.placeShip(board.ships[3], 0, 0);
+    board.placeShip(board.ships[4], 0, 2);
+    board.moveShip(board.spaces[0][0].ship, 0, 2);
+    board.moveShip(board.spaces[0][0].ship, 0, 1);
+    expect(board.spaces[0][2].ship).toEqual(board.ships[4]);
+    expect(board.spaces[0][1].ship).toBeNull();
+    expect(board.spaces[0][0].ship).toEqual(board.ships[3]);
+});
+
 test('Attacks on a ship', () => {
     const board = new Gameboard();
     board.placeShip(board.ships[2], 0, 0);
