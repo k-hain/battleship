@@ -1,5 +1,3 @@
-import { Ship } from "./ship.js";
-
 export const BOARD_WIDTH = 10;
 const SHIP_LENGTHS = [5, 4, 3, 3, 2];
 
@@ -10,6 +8,29 @@ class Space {
         this.ship = null;
         this.isHit = false;
         this.isLocked = false;
+    }
+}
+
+class Ship {
+    constructor (length, isHorizontal) {
+        this.length = length;
+        this.hits = 0;
+        this.x = undefined;
+        this.y = undefined;
+        this.isHorizontal = isHorizontal;
+    }
+
+    isSunk () {
+        if (this.hits === this.length) {
+            return true;
+        }
+        return false;
+    }
+
+    hit () {
+        if (!this.isSunk()) {
+            this.hits += 1;
+        }
     }
 }
 
