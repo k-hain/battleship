@@ -149,6 +149,10 @@ button:hover, .space-interactive:hover {
     background-color: rgb(45, 43, 50);
 }
 
+.space-hover {
+    background-color: rgb(30, 163, 81);
+}
+
 .info-wrapper {
     display: flex;
     align-items: center;

@@ -76,7 +76,8 @@ export class DisplayController {
         ];
 
         this.initBoards(this.boards);
-        this.boardSetup(this.board1);
+        this.boardSetup();
+        this.makeBoardEditable(this.boards[0]);
     }
 
     initBoards(boards) {
@@ -86,7 +87,7 @@ export class DisplayController {
         }
     }
 
-    boardSetup(board) {
+    boardSetup() {
         const infoWrapperEl = document.querySelector('.info-wrapper');
 
         const infoEl = drawDomElement({
@@ -106,5 +107,31 @@ export class DisplayController {
         startButtonEl.addEventListener('click', () => {
             //
         });
+    }
+
+    makeBoardEditable(board) {
+        for (let ship of board.data.ships) {
+            const domSpaces = [];
+
+            for (let space of ship.spaces) {
+                domSpaces.push(board.display.spaces[space.x][space.y]);      
+            }
+
+            for (let spaceEl of domSpaces) {
+                spaceEl.addEventListener('mouseenter', () => {
+                    for (let el of domSpaces) {
+                        el.classList.add('space-hover');
+                    }
+                    //show move & rotate icons in the middle
+                })
+
+                spaceEl.addEventListener('mouseleave', () => {
+                    for (let el of domSpaces) {
+                        el.classList.remove('space-hover');
+                    }
+                    //remove icons when leaving
+                })
+            }
+        }
     }
 }
