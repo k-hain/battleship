@@ -54,6 +54,23 @@ test('Remove a ship, keep locked around others', () => {
     expect(board.spaces[0][5].isLocked).toBe(true);
 });
 
+test('Rotate ship', () => {
+    const board = new Gameboard();
+    board.placeShip(board.ships[3], 0, 0);
+    board.rotateShip(board.spaces[0][0].ship);
+    expect(board.spaces[0][1].ship).toEqual(board.ships[3]);
+});
+
+test('Rotate ship on an invalid space', () => {
+    const board = new Gameboard();
+    board.placeShip(board.ships[3], 0, 0);
+    board.placeShip(board.ships[2], 0, 2);
+    board.rotateShip(board.spaces[0][0].ship);
+    expect(board.spaces[1][0].ship).toEqual(board.ships[3]);
+    expect(board.spaces[0][2].ship).toEqual(board.ships[2]);
+    expect(board.spaces[0][1].ship).toBeNull();
+});
+
 test('Attacks on a ship', () => {
     const board = new Gameboard();
     board.placeShip(board.ships[2], 0, 0);

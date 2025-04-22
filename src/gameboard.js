@@ -86,6 +86,9 @@ export class Gameboard {
             }
 
             this.addLockedArea(ship);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -104,6 +107,30 @@ export class Gameboard {
             if (ship.x !== null && ship.y !== null) {
                 this.addLockedArea(ship);
             }
+        }
+    }
+
+    rotateShip(targetShip) {
+        const x = targetShip.x;
+        const y = targetShip.y
+
+        this.removeShip(targetShip);
+
+        if (targetShip.isHorizontal) {
+            targetShip.isHorizontal = false;
+        } else {
+            targetShip.isHorizontal = true;
+        }
+
+        const rotated = this.placeShip(targetShip, x, y);
+        if (!rotated) {
+            if (targetShip.isHorizontal) {
+                targetShip.isHorizontal = false;
+            } else {
+                targetShip.isHorizontal = true;
+            }
+
+            this.placeShip(targetShip, x, y);
         }
     }
 
