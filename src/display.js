@@ -19,7 +19,11 @@ class Display {
             this.spaces.push(new Array());
 
             for (let y = 0; y < BOARD_WIDTH; y++) {
-                const spaceEl = drawDomElement({type: 'div', container: boardEl, classes: ['space']})
+                const spaceEl = drawDomElement({
+                    type: 'div',
+                    container: boardEl,
+                    classes: ['space'],
+                });
                 this.spaces[x].push(spaceEl);
                 spaceEl.style.gridRow = `${y + 1} / span 1`;
                 spaceEl.style.gridColumn = `${x + 1} / span 1`;
@@ -28,7 +32,7 @@ class Display {
         }
     }
 
-    refresh() {        
+    refresh() {
         forEachSpace(this.spaces, (spaceEl) => {
             spaceEl.className = 'space';
             if (this.id === 1 && !spaceEl.data.isHit) {
@@ -51,10 +55,25 @@ class Display {
 export class DisplayController {
     constructor(board1El, player1NameEl, board2El, player2NameEl) {
         this.board1 = new Gameboard(0);
-        this.board1Display = new Display(0, board1El, this.board1, player1NameEl, 'Player');
+        this.board1Display = new Display(
+            0,
+            board1El,
+            this.board1,
+            player1NameEl,
+            'Player'
+        );
         this.board2 = new Gameboard(1);
-        this.board2Display = new Display(1, board2El, this.board2, player2NameEl, 'Computer');
-        this.boards = [{id: 0, data: this.board1, display: this.board1Display}, {id: 1, data: this.board2, display: this.board2Display}];
+        this.board2Display = new Display(
+            1,
+            board2El,
+            this.board2,
+            player2NameEl,
+            'Computer'
+        );
+        this.boards = [
+            { id: 0, data: this.board1, display: this.board1Display },
+            { id: 1, data: this.board2, display: this.board2Display },
+        ];
 
         this.initBoards(this.boards);
     }

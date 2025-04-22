@@ -1,7 +1,7 @@
-import { BOARD_WIDTH, SHIP_LENGTHS } from "./global-variables.js";
+import { BOARD_WIDTH, SHIP_LENGTHS } from './global-variables.js';
 
 class Space {
-    constructor (x, y) {
+    constructor(x, y) {
         this.x = x;
         this.y = y;
         this.ship = null;
@@ -11,7 +11,7 @@ class Space {
 }
 
 class Ship {
-    constructor (length, isHorizontal) {
+    constructor(length, isHorizontal) {
         this.length = length;
         this.hits = 0;
         this.x = null;
@@ -20,14 +20,14 @@ class Ship {
         this.spaces = [];
     }
 
-    isSunk () {
+    isSunk() {
         if (this.hits === this.length) {
             return true;
         }
         return false;
     }
 
-    hit () {
+    hit() {
         if (!this.isSunk()) {
             this.hits += 1;
         }
@@ -35,7 +35,7 @@ class Ship {
 }
 
 export class Gameboard {
-    constructor (id) {
+    constructor(id) {
         this.id = id;
         this.spaces = [];
         this.ships = [];
@@ -43,13 +43,13 @@ export class Gameboard {
         this.makeBoard();
     }
 
-    makeShips () {
+    makeShips() {
         for (let length of SHIP_LENGTHS) {
             this.ships.push(new Ship(length, true));
         }
     }
 
-    makeBoard () {
+    makeBoard() {
         for (let x = 0; x < BOARD_WIDTH; x++) {
             this.spaces.push(new Array());
 
@@ -59,7 +59,7 @@ export class Gameboard {
         }
     }
 
-    setupShips () {
+    setupShips() {
         let x = 0;
         let y = 0;
         for (let ship of this.ships) {
@@ -68,16 +68,19 @@ export class Gameboard {
         }
     }
 
-    placeShip (ship, x, y) {
-        if (
-            this.validateShipPlacement(ship, x, y)
-        ) {
+    placeShip(ship, x, y) {
+        if (this.validateShipPlacement(ship, x, y)) {
             ship.x = x;
             ship.y = y;
 
             for (let i = 0; i < ship.length; i++) {
-                const [currX, currY] = this.getShipSegmentCoords(ship.x, ship.y, ship.isHorizontal, i);
-                
+                const [currX, currY] = this.getShipSegmentCoords(
+                    ship.x,
+                    ship.y,
+                    ship.isHorizontal,
+                    i
+                );
+
                 this.spaces[currX][currY].ship = ship;
                 ship.spaces.push(this.spaces[currX][currY]);
             }
@@ -86,7 +89,7 @@ export class Gameboard {
         }
     }
 
-    removeShip (x, y) {
+    removeShip(x, y) {
         const targetShip = this.spaces[x][y].ship;
 
         this.removeLockedArea(targetShip);
@@ -106,18 +109,26 @@ export class Gameboard {
         }
     }
 
-    validateShipPlacement (ship, x, y) {
+    validateShipPlacement(ship, x, y) {
         for (let i = 0; i < ship.length; i++) {
-            const [currX, currY] = this.getShipSegmentCoords(x, y, ship.isHorizontal, i);
+            const [currX, currY] = this.getShipSegmentCoords(
+                x,
+                y,
+                ship.isHorizontal,
+                i
+            );
 
-            if (this.spaces[currX][currY].ship || this.spaces[currX][currY].isLocked) {
+            if (
+                this.spaces[currX][currY].ship ||
+                this.spaces[currX][currY].isLocked
+            ) {
                 return false;
             }
         }
         return true;
     }
 
-    receiveAttack (x, y) {
+    receiveAttack(x, y) {
         if (!this.spaces[x][y].isHit) {
             this.spaces[x][y].isHit = true;
 
@@ -127,7 +138,7 @@ export class Gameboard {
         }
     }
 
-    checkAllSunk () {
+    checkAllSunk() {
         for (let ship of this.ships) {
             if (!ship.isSunk()) {
                 return false;
@@ -136,30 +147,41 @@ export class Gameboard {
         return true;
     }
 
-    forEachSpaceAround (ship, callback) {
+    forEachSpaceAround(ship, callback) {
         for (let i = -1; i < ship.length + 1; i++) {
             const targetSpaces = [];
 
-            const [currX, currY] = this.getShipSegmentCoords(ship.x, ship.y, ship.isHorizontal, i);
+            const [currX, currY] = this.getShipSegmentCoords(
+                ship.x,
+                ship.y,
+                ship.isHorizontal,
+                i
+            );
 
             if (ship.isHorizontal) {
-                targetSpaces.push({x: currX, y: currY + 1}, {x: currX, y: currY - 1});
+                targetSpaces.push(
+                    { x: currX, y: currY + 1 },
+                    { x: currX, y: currY - 1 }
+                );
             } else {
-                targetSpaces.push({x: currX + 1, y: currY}, {x: currX - 1, y: currY});
+                targetSpaces.push(
+                    { x: currX + 1, y: currY },
+                    { x: currX - 1, y: currY }
+                );
             }
             if (i === -1 || i === ship.length) {
-                targetSpaces.push({x: currX, y: currY});
+                targetSpaces.push({ x: currX, y: currY });
             }
 
             for (let coords of targetSpaces) {
                 if (this.checkBounds([coords.x, coords.y])) {
-                    callback(this.spaces[coords.x][coords.y]); 
-                }      
+                    callback(this.spaces[coords.x][coords.y]);
+                }
             }
         }
     }
 
-    getShipSegmentCoords (x, y, isHorizontal, offset) {
+    getShipSegmentCoords(x, y, isHorizontal, offset) {
         let newX, newY;
 
         if (isHorizontal) {
@@ -173,27 +195,27 @@ export class Gameboard {
         return [newX, newY];
     }
 
-    addLockedArea (ship) {
+    addLockedArea(ship) {
         this.forEachSpaceAround(ship, (space) => {
             space.isLocked = true;
         });
     }
 
-    removeLockedArea (ship) {
+    removeLockedArea(ship) {
         this.forEachSpaceAround(ship, (space) => {
             space.isLocked = false;
         });
     }
 
-    addHitsAround (ship) {
+    addHitsAround(ship) {
         this.forEachSpaceAround(ship, (space) => {
             if (!space.isHit) {
                 space.isHit = true;
-            }  
+            }
         });
     }
 
-    checkBounds (values) {
+    checkBounds(values) {
         for (let value of values) {
             if (value >= BOARD_WIDTH || value < 0) {
                 return false;
