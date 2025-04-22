@@ -15,9 +15,10 @@ class Ship {
     constructor (length, isHorizontal) {
         this.length = length;
         this.hits = 0;
-        this.x = undefined;
-        this.y = undefined;
+        this.x = null;
+        this.y = null;
         this.isHorizontal = isHorizontal;
+        this.spaces = [];
     }
 
     isSunk () {
@@ -44,7 +45,7 @@ export class Gameboard {
 
     makeShips () {
         for (let length of SHIP_LENGTHS) {
-            this.ships.push(new Ship(length, true))
+            this.ships.push(new Ship(length, true));
         }
     }
 
@@ -78,6 +79,7 @@ export class Gameboard {
                 const [currX, currY] = this.getShipSegmentCoords(ship.x, ship.y, ship.isHorizontal, i);
                 
                 this.spaces[currX][currY].ship = ship;
+                ship.spaces.push(this.spaces[currX][currY]);
             }
 
             this.addLockedArea(ship);
