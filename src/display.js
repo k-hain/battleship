@@ -4,12 +4,15 @@ import { BOARD_WIDTH } from './global-variables.js';
 import { forEachSpace } from './helpers.js';
 import { Gameboard } from './gameboard.js';
 import { drawDomElement } from './dom-fns.js';
+import moveIcon from './svg/drag_pan_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
+import rotateIcon from './svg/turn_right_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
 
 class Display {
     constructor(id, boardEl, board, playerNameEl, playerName) {
         this.id = id;
         this.spaces = [];
         this.createSpaces(boardEl, board, playerNameEl, playerName);
+        this.container = boardEl;
     }
 
     createSpaces(boardEl, board, playerNameEl, playerName) {
@@ -110,6 +113,30 @@ export class DisplayController {
     }
 
     makeBoardEditable(board) {
+        const moveBtnEl = drawDomElement({
+            type: 'button',
+            classes: ['board-button'],
+        });
+
+        const moveBtnIconEl = drawDomElement({
+            type: 'img',
+            container: moveBtnEl,
+            classes: ['board-button-icon'],
+            src: moveIcon
+        });
+
+        const rotateBtnEl = drawDomElement({
+            type: 'button',
+            classes: ['board-button'],
+        });
+
+        const rotateBtnIconEl = drawDomElement({
+            type: 'img',
+            container: rotateBtnEl,
+            classes: ['board-button-icon'],
+            src: rotateIcon
+        });
+
         for (let ship of board.data.ships) {
             const domSpaces = [];
 
@@ -123,6 +150,14 @@ export class DisplayController {
                         el.classList.add('space-hover');
                     }
                     //show move & rotate icons in the middle
+
+                    board.display.spaces[ship.x][ship.y].appendChild(moveBtnEl);
+                    if (ship.isHorizontal) {
+                        board.display.spaces[ship.x + 1][ship.y].appendChild(rotateBtnEl); 
+                    } else {
+                        board.display.spaces[ship.x][ship.y + 1].appendChild(rotateBtnEl); 
+                    }
+                    
                 })
 
                 spaceEl.addEventListener('mouseleave', () => {
@@ -130,6 +165,13 @@ export class DisplayController {
                         el.classList.remove('space-hover');
                     }
                     //remove icons when leaving
+
+                    board.display.spaces[ship.x][ship.y].removeChild(moveBtnEl);
+                    if (ship.isHorizontal) {
+                        board.display.spaces[ship.x + 1][ship.y].removeChild(rotateBtnEl); 
+                    } else {
+                        board.display.spaces[ship.x][ship.y + 1].removeChild(rotateBtnEl); 
+                    }
                 })
             }
         }
