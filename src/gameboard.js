@@ -1,5 +1,4 @@
-export const BOARD_WIDTH = 10;
-const SHIP_LENGTHS = [5, 4, 3, 3, 2];
+import { BOARD_WIDTH, SHIP_LENGTHS } from "./global-variables.js";
 
 class Space {
     constructor (x, y) {
