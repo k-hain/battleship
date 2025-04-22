@@ -37,7 +37,7 @@ test('Check vertical ship', () => {
 test('Remove a ship', () => {
     const board = new Gameboard();
     board.placeShip(board.ships[2], 0, 0);
-    board.removeShip(2, 0);
+    board.removeShip(board.spaces[2][0].ship);
     expect(board.spaces[2][0].ship).toBeNull();
     expect(board.spaces[3][0].isLocked).toBe(false);
     expect(board.spaces[0][1].isLocked).toBe(false);
@@ -48,7 +48,7 @@ test('Remove a ship, keep locked around others', () => {
     board.placeShip(board.ships[2], 0, 0);
     board.placeShip(board.ships[3], 0, 2);
     board.placeShip(board.ships[4], 0, 4);
-    board.removeShip(2, 0);
+    board.removeShip(board.spaces[2][0].ship);
     expect(board.spaces[0][1].isLocked).toBe(true);
     expect(board.spaces[0][3].isLocked).toBe(true);
     expect(board.spaces[0][5].isLocked).toBe(true);

@@ -89,9 +89,7 @@ export class Gameboard {
         }
     }
 
-    removeShip(x, y) {
-        const targetShip = this.spaces[x][y].ship;
-
+    removeShip(targetShip) {
         this.removeLockedArea(targetShip);
 
         for (let space of targetShip.spaces) {
