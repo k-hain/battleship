@@ -76,6 +76,7 @@ export class DisplayController {
         ];
 
         this.initBoards(this.boards);
+        this.boardSetup(this.board1);
     }
 
     initBoards(boards) {
@@ -83,5 +84,27 @@ export class DisplayController {
             board.data.setupShips();
             board.display.refresh();
         }
+    }
+
+    boardSetup(board) {
+        const infoWrapperEl = document.querySelector('.info-wrapper');
+
+        const infoEl = drawDomElement({
+            type: 'div',
+            container: infoWrapperEl,
+            classes: ['info'],
+            text: 'Arrange your ships on the board'
+        });
+
+        const startButtonEl = drawDomElement({
+            type: 'button',
+            container: infoWrapperEl,
+            classes: ['start-btn'],
+            text: 'Start Game'
+        });
+
+        startButtonEl.addEventListener('click', () => {
+            //
+        });
     }
 }
