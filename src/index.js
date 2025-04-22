@@ -1,10 +1,7 @@
-/* global document, setTimeout */
+/* global document */
 
 import './style.css';
 import { DisplayController } from './display.js';
-import { Game } from './game.js';
-
-const game = new Game();
 
 const board1El = document.getElementById('board1');
 const board2El = document.getElementById('board2');
@@ -18,7 +15,3 @@ const display = new DisplayController(
     board2El,
     player2NameEl
 );
-
-setTimeout(() => {
-    game.startSetup();
-}, 100);

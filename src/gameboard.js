@@ -35,7 +35,8 @@ class Ship {
 }
 
 export class Gameboard {
-    constructor () {
+    constructor (id) {
+        this.id = id;
         this.spaces = [];
         this.ships = [];
         this.makeShips();
