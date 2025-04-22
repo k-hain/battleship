@@ -86,6 +86,26 @@ export class Gameboard {
         }
     }
 
+    removeShip (x, y) {
+        const targetShip = this.spaces[x][y].ship;
+
+        this.removeLockedArea(targetShip);
+
+        for (let space of targetShip.spaces) {
+            space.ship = null;
+        }
+
+        targetShip.spaces = [];
+        targetShip.x = null;
+        targetShip.y = null;
+
+        for (let ship of this.ships) {
+            if (ship.x !== null && ship.y !== null) {
+                this.addLockedArea(ship);
+            }
+        }
+    }
+
     validateShipPlacement (ship, x, y) {
         for (let i = 0; i < ship.length; i++) {
             const [currX, currY] = this.getShipSegmentCoords(x, y, ship.isHorizontal, i);
@@ -156,6 +176,12 @@ export class Gameboard {
     addLockedArea (ship) {
         this.forEachSpaceAround(ship, (space) => {
             space.isLocked = true;
+        });
+    }
+
+    removeLockedArea (ship) {
+        this.forEachSpaceAround(ship, (space) => {
+            space.isLocked = false;
         });
     }
 
