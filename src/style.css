@@ -176,3 +176,11 @@ button:hover, .space-interactive:hover {
     width: 32px;
     height: 32px;
 }
+
+.board-button {
+    display: none;
+}
+
+.space-hover .board-button {
+    display: initial;
+}

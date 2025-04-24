@@ -29,7 +29,6 @@ export function drawDomElement(data) {
     return el;
 }
 
-
 function addCssClasses(el, classes) {
     for (let css of classes) {
         el.classList.add(css);

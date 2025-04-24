@@ -3,21 +3,26 @@
 import { BOARD_WIDTH } from './global-variables.js';
 import { forEachSpace } from './helpers.js';
 import { Gameboard } from './gameboard.js';
-import { drawDomElement } from './dom-fns.js';
+import { drawDomElement, clearContents } from './dom-fns.js';
 import moveIcon from './svg/drag_pan_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
 import rotateIcon from './svg/turn_right_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
+import PubSub from 'pubsub-js';
+import { REMOVE_SPACE_LISTENERS } from './event-types.js';
 
 class Display {
     constructor(id, boardEl, board, playerNameEl, playerName) {
         this.id = id;
         this.spaces = [];
-        this.createSpaces(boardEl, board, playerNameEl, playerName);
+        this.addName(playerNameEl, playerName);
+        this.createSpaces(boardEl, board);
         this.container = boardEl;
     }
 
-    createSpaces(boardEl, board, playerNameEl, playerName) {
+    addName(playerNameEl, playerName) {
         playerNameEl.textContent = playerName;
+    }
 
+    createSpaces(boardEl, board) {
         for (let x = 0; x < BOARD_WIDTH; x++) {
             this.spaces.push(new Array());
 
@@ -53,6 +58,107 @@ class Display {
             }
         });
     }
+/*
+    addButtons(boardData) {
+        for (let ship of boardData.ships) {
+            const domSpaces = [];
+
+            for (let space of ship.spaces) {
+                domSpaces.push(this.spaces[space.x][space.y]);      
+            }
+
+            //
+            const enterEvt = function () {
+                for (let el of domSpaces) {
+                    el.classList.add('space-hover');
+                }
+            };
+
+            const leaveEvt = function () {
+                for (let el of domSpaces) {
+                    el.classList.remove('space-hover');
+                }
+            }
+
+            for (let spaceEl of domSpaces) {
+                spaceEl.addEventListener('mouseenter', enterEvt); 
+                spaceEl.addEventListener('mouseleave', leaveEvt);
+            }
+            //
+
+            const moveBtnEl = drawDomElement({
+                type: 'button',
+                classes: ['board-button'],
+            });
+
+            const moveBtnIconEl = drawDomElement({
+                type: 'img',
+                container: moveBtnEl,
+                classes: ['board-button-icon'],
+                src: moveIcon
+            });
+
+            const rotateBtnEl = drawDomElement({
+                type: 'button',
+                classes: ['board-button'],
+            });
+
+            const rotateBtnIconEl = drawDomElement({
+                type: 'img',
+                container: rotateBtnEl,
+                classes: ['board-button-icon'],
+                src: rotateIcon
+            });
+
+            this.spaces[ship.x][ship.y].appendChild(moveBtnEl);
+            let spaceRotateBtnEl;
+            if (ship.isHorizontal) {
+                spaceRotateBtnEl = this.spaces[ship.x + 1][ship.y]; 
+            } else {
+                spaceRotateBtnEl = this.spaces[ship.x][ship.y + 1]; 
+            }
+            spaceRotateBtnEl.appendChild(rotateBtnEl);
+
+            rotateBtnEl.addEventListener('click', (evt) => {
+                for (let el of domSpaces) {
+                    el.classList.remove('space-hover');
+                    clearContents(el);
+                    el.removeEventListener('mouseleave', leaveEvt);
+                    el.removeEventListener('mouseenter', enterEvt);
+                }
+            });
+        }        
+    }
+
+    addHoverEffects(boardData) {
+        for (let ship of boardData.ships) {
+            const domSpaces = [];
+
+            for (let space of ship.spaces) {
+                domSpaces.push(this.spaces[space.x][space.y]);      
+            }
+
+            for (let spaceEl of domSpaces) {
+                const enterEvt = function () {
+                    for (let el of domSpaces) {
+                        el.classList.add('space-hover');
+                    }
+                };
+
+                spaceEl.addEventListener('mouseenter', enterEvt); 
+
+                const leaveEvt = function () {
+                    for (let el of domSpaces) {
+                        el.classList.remove('space-hover');
+                    }
+                }
+
+                spaceEl.addEventListener('mouseleave', leaveEvt);
+            }
+        }
+    }
+
+    */
 }
 
 export class DisplayController {
@@ -79,8 +185,7 @@ export class DisplayController {
         ];
 
         this.initBoards(this.boards);
-        this.boardSetup();
-        this.makeBoardEditable(this.boards[0]);
+        this.boardSetup(this.boards[0]);
     }
 
     initBoards(boards) {
@@ -90,7 +195,7 @@ export class DisplayController {
         }
     }
 
-    boardSetup() {
+    boardSetup(board) {
         const infoWrapperEl = document.querySelector('.info-wrapper');
 
         const infoEl = drawDomElement({
@@ -107,12 +212,42 @@ export class DisplayController {
             text: 'Start Game'
         });
 
+        this.makeBoardEditable(board);
+
         startButtonEl.addEventListener('click', () => {
-            //
         });
     }
 
     makeBoardEditable(board) {
+        for (let ship of board.data.ships) {
+            this.MakeShipEditable(board, ship);
+        }       
+    }
+
+    MakeShipEditable(board, ship) {
+        const domSpaces = [];
+
+        for (let space of ship.spaces) {
+            domSpaces.push(board.display.spaces[space.x][space.y]);      
+        }
+
+        const enterEvt = function () {
+            for (let el of domSpaces) {
+                el.classList.add('space-hover');
+            }
+        };
+
+        const leaveEvt = function () {
+            for (let el of domSpaces) {
+                el.classList.remove('space-hover');
+            }
+        }
+
+        for (let spaceEl of domSpaces) {
+            spaceEl.addEventListener('mouseenter', enterEvt); 
+            spaceEl.addEventListener('mouseleave', leaveEvt);
+        }
+
         const moveBtnEl = drawDomElement({
             type: 'button',
             classes: ['board-button'],
@@ -137,43 +272,27 @@ export class DisplayController {
             src: rotateIcon
         });
 
-        for (let ship of board.data.ships) {
-            const domSpaces = [];
-
-            for (let space of ship.spaces) {
-                domSpaces.push(board.display.spaces[space.x][space.y]);      
-            }
-
-            for (let spaceEl of domSpaces) {
-                spaceEl.addEventListener('mouseenter', () => {
-                    for (let el of domSpaces) {
-                        el.classList.add('space-hover');
-                    }
-                    //show move & rotate icons in the middle
-
-                    board.display.spaces[ship.x][ship.y].appendChild(moveBtnEl);
-                    if (ship.isHorizontal) {
-                        board.display.spaces[ship.x + 1][ship.y].appendChild(rotateBtnEl); 
-                    } else {
-                        board.display.spaces[ship.x][ship.y + 1].appendChild(rotateBtnEl); 
-                    }
-                    
-                })
-
-                spaceEl.addEventListener('mouseleave', () => {
-                    for (let el of domSpaces) {
-                        el.classList.remove('space-hover');
-                    }
-                    //remove icons when leaving
-
-                    board.display.spaces[ship.x][ship.y].removeChild(moveBtnEl);
-                    if (ship.isHorizontal) {
-                        board.display.spaces[ship.x + 1][ship.y].removeChild(rotateBtnEl); 
-                    } else {
-                        board.display.spaces[ship.x][ship.y + 1].removeChild(rotateBtnEl); 
-                    }
-                })
-            }
+        board.display.spaces[ship.x][ship.y].appendChild(moveBtnEl);
+        
+        let spaceRotateBtnEl;
+        if (ship.isHorizontal) {
+            spaceRotateBtnEl = board.display.spaces[ship.x + 1][ship.y]; 
+        } else {
+            spaceRotateBtnEl = board.display.spaces[ship.x][ship.y + 1]; 
         }
+        spaceRotateBtnEl.appendChild(rotateBtnEl);
+
+        rotateBtnEl.addEventListener('click', (evt) => {
+            for (let el of domSpaces) {
+                el.classList.remove('space-hover');
+                clearContents(el);
+                el.removeEventListener('mouseleave', leaveEvt);
+                el.removeEventListener('mouseenter', enterEvt);
+            }
+
+            board.data.rotateShip(ship);
+            board.display.refresh();
+            this.MakeShipEditable(board, ship);
+        });        
     }
 }
