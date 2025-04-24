@@ -6,3 +6,5 @@ export const START_PLAYER_ROUND = Symbol('START_PLAYER_ROUND');
 export const ATTACK_SPACE = Symbol('ATTACK_SPACE');
 export const START_PLAYER_SETUP = Symbol('START_PLAYER_SETUP');
 export const START_GAME = Symbol('START_GAME');
+//
+export const REFRESH_DISPLAY_AND_WIDGETS = Symbol('REFRESH_DISPLAY_AND_WIDGETS');

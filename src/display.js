@@ -7,7 +7,125 @@ import { drawDomElement, clearContents } from './dom-fns.js';
 import moveIcon from './svg/drag_pan_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
 import rotateIcon from './svg/turn_right_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
 import PubSub from 'pubsub-js';
-import { REMOVE_SPACE_LISTENERS } from './event-types.js';
+import { REFRESH_DISPLAY_AND_WIDGETS } from './event-types.js';
+
+class shipTransformWidget {
+    constructor(ship, board) {
+        this.id = board.id;
+        this.ship = ship;
+        this.spaces = this.getShipSpaces(ship, board);
+        this.moveBtnContainer = this.getMoveBtnContainer(ship, board);
+        this.rotateBtnContainer = this.getRotateBtnContainer(ship, board);
+        this.init(board);
+    }
+
+    init(board) {
+        this.addHovers();
+        this.addButtons(board);
+    }
+
+    clear() {
+        this.removeHoverClass();
+        this.removeButtons();
+        this.removeHovers();
+    }
+
+    getShipSpaces(ship, board) {
+        const domSpaces = [];
+
+        for (let space of ship.spaces) {
+            domSpaces.push(board.display.spaces[space.x][space.y]);
+        }
+
+        return domSpaces;
+    }
+
+    getMoveBtnContainer(ship, board) {
+        return board.display.spaces[ship.x][ship.y];
+    }
+
+    getRotateBtnContainer(ship, board) {
+        if (ship.isHorizontal) {
+            return board.display.spaces[ship.x + 1][ship.y];
+        } else {
+            return board.display.spaces[ship.x][ship.y + 1];
+        }
+    }
+
+    highlightOn = function () {
+        for (let el of this.spaces) {
+            el.classList.add('space-hover');
+        }
+    }.bind(this);
+
+    highlightOff = function () {
+        for (let el of this.spaces) {
+            el.classList.remove('space-hover');
+        }
+    }.bind(this);
+
+    addHovers() {
+        for (let el of this.spaces) {
+            el.addEventListener('mouseenter', this.highlightOn);
+            el.addEventListener('mouseleave', this.highlightOff);
+        }
+    }
+
+    removeHovers() {
+        for (let el of this.spaces) {
+            el.removeEventListener('mouseleave', this.highlightOff);
+            el.removeEventListener('mouseenter', this.highlightOn);
+        }
+    }
+
+    removeHoverClass() {
+        for (let el of this.spaces) {
+            el.classList.remove('space-hover');
+        }
+    }
+
+    addButtons(board) {
+        const moveBtnEl = drawDomElement({
+            type: 'button',
+            container: this.moveBtnContainer,
+            classes: ['board-button'],
+        });
+
+        drawDomElement({
+            type: 'img',
+            container: moveBtnEl,
+            classes: ['board-button-icon'],
+            src: moveIcon,
+        });
+
+        const rotateBtnEl = drawDomElement({
+            type: 'button',
+            container: this.rotateBtnContainer,
+            classes: ['board-button'],
+        });
+
+        drawDomElement({
+            type: 'img',
+            container: rotateBtnEl,
+            classes: ['board-button-icon'],
+            src: rotateIcon,
+        });
+
+        rotateBtnEl.addEventListener('click', () => {
+            const rotated = board.data.rotateShip(this.ship);
+
+            if (rotated) {
+                this.clear();
+                PubSub.publish(REFRESH_DISPLAY_AND_WIDGETS, this.id);
+            }
+        });
+    }
+
+    removeButtons() {
+        clearContents(this.moveBtnContainer);
+        clearContents(this.rotateBtnContainer);
+    }
+}
 
 class Display {
     constructor(id, boardEl, board, playerNameEl, playerName) {
@@ -16,6 +134,7 @@ class Display {
         this.addName(playerNameEl, playerName);
         this.createSpaces(boardEl, board);
         this.container = boardEl;
+        this.widgets = [];
     }
 
     addName(playerNameEl, playerName) {
@@ -57,6 +176,29 @@ class Display {
                 }
             }
         });
+    }
+
+    refreshBoardAndWidgets(board) {
+        this.refresh();
+        this.resetWidgets(board);
+    }
+
+    addWidgets(board) {
+        for (let ship of board.data.ships) {
+            this.widgets.push(new shipTransformWidget(ship, board));
+        }
+    }
+
+    clearWidgets() {
+        for (let widget of this.widgets) {
+            widget.clear();
+        }
+        this.widgets = [];
+    }
+
+    resetWidgets(board) {
+        this.clearWidgets();
+        this.addWidgets(board);
     }
 }
 
@@ -101,97 +243,27 @@ export class DisplayController {
             type: 'div',
             container: infoWrapperEl,
             classes: ['info'],
-            text: 'Arrange your ships on the board'
+            text: 'Arrange your ships on the board',
         });
 
         const startButtonEl = drawDomElement({
             type: 'button',
             container: infoWrapperEl,
             classes: ['start-btn'],
-            text: 'Start Game'
+            text: 'Start Game',
         });
 
-        this.makeBoardEditable(board);
-
-        startButtonEl.addEventListener('click', () => {
-        });
+        startButtonEl.addEventListener('click', () => {});
+        board.display.addWidgets(board);
     }
 
-    makeBoardEditable(board) {
-        for (let ship of board.data.ships) {
-            this.MakeShipEditable(board, ship);
-        }       
-    }
+    boardSetupRefresh = function (msg, id) {
+        const board = this.boards[id];
 
-    MakeShipEditable(board, ship) {
-        const domSpaces = [];
-
-        for (let space of ship.spaces) {
-            domSpaces.push(board.display.spaces[space.x][space.y]);      
-        }
-
-        const enterEvt = function () {
-            for (let el of domSpaces) {
-                el.classList.add('space-hover');
-            }
-        };
-
-        const leaveEvt = function () {
-            for (let el of domSpaces) {
-                el.classList.remove('space-hover');
-            }
-        }
-
-        for (let spaceEl of domSpaces) {
-            spaceEl.addEventListener('mouseenter', enterEvt); 
-            spaceEl.addEventListener('mouseleave', leaveEvt);
-        }
-
-        const moveBtnEl = drawDomElement({
-            type: 'button',
-            classes: ['board-button'],
-        });
-
-        const moveBtnIconEl = drawDomElement({
-            type: 'img',
-            container: moveBtnEl,
-            classes: ['board-button-icon'],
-            src: moveIcon
-        });
-
-        const rotateBtnEl = drawDomElement({
-            type: 'button',
-            classes: ['board-button'],
-        });
-
-        const rotateBtnIconEl = drawDomElement({
-            type: 'img',
-            container: rotateBtnEl,
-            classes: ['board-button-icon'],
-            src: rotateIcon
-        });
-
-        board.display.spaces[ship.x][ship.y].appendChild(moveBtnEl);
-        
-        let spaceRotateBtnEl;
-        if (ship.isHorizontal) {
-            spaceRotateBtnEl = board.display.spaces[ship.x + 1][ship.y]; 
-        } else {
-            spaceRotateBtnEl = board.display.spaces[ship.x][ship.y + 1]; 
-        }
-        spaceRotateBtnEl.appendChild(rotateBtnEl);
-
-        rotateBtnEl.addEventListener('click', (evt) => {
-            for (let el of domSpaces) {
-                el.classList.remove('space-hover');
-                clearContents(el);
-                el.removeEventListener('mouseleave', leaveEvt);
-                el.removeEventListener('mouseenter', enterEvt);
-            }
-
-            board.data.rotateShip(ship);
-            board.display.refresh();
-            this.MakeShipEditable(board, ship);
-        });        
-    }
+        board.display.refreshBoardAndWidgets(board);
+    }.bind(this);
+    boardSetupRefreshToken = PubSub.subscribe(
+        REFRESH_DISPLAY_AND_WIDGETS,
+        this.boardSetupRefresh
+    );
 }

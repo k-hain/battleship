@@ -134,7 +134,10 @@ export class Gameboard {
             }
 
             this.placeShip(targetShip, x, y);
+            return false;
         }
+        
+        return true;
     }
 
     moveShip(targetShip, newX, newY) {
