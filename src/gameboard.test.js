@@ -39,19 +39,6 @@ test('Remove a ship', () => {
     board.placeShip(board.ships[2], 0, 0);
     board.removeShip(board.spaces[2][0].ship);
     expect(board.spaces[2][0].ship).toBeNull();
-    expect(board.spaces[3][0].isLocked).toBe(false);
-    expect(board.spaces[0][1].isLocked).toBe(false);
-});
-
-test('Remove a ship, keep locked around others', () => {
-    const board = new Gameboard();
-    board.placeShip(board.ships[2], 0, 0);
-    board.placeShip(board.ships[3], 0, 2);
-    board.placeShip(board.ships[4], 0, 4);
-    board.removeShip(board.spaces[2][0].ship);
-    expect(board.spaces[0][1].isLocked).toBe(true);
-    expect(board.spaces[0][3].isLocked).toBe(true);
-    expect(board.spaces[0][5].isLocked).toBe(true);
 });
 
 test('Rotate ship', () => {
@@ -153,19 +140,4 @@ test('checkAllSunk - not all sunk', () => {
     board.receiveAttack(2, 6);
     board.placeShip(board.ships[4], 0, 8);
     expect(board.checkAllSunk()).toBe(false);
-});
-
-test('Locked area around ships', () => {
-    const board = new Gameboard();
-    board.placeShip(board.ships[4], 3, 5);
-    expect(board.spaces[2][4].isLocked).toBe(true);
-    expect(board.spaces[2][5].isLocked).toBe(true);
-    expect(board.spaces[2][6].isLocked).toBe(true);
-    expect(board.spaces[3][4].isLocked).toBe(true);
-    expect(board.spaces[3][6].isLocked).toBe(true);
-    expect(board.spaces[4][4].isLocked).toBe(true);
-    expect(board.spaces[4][6].isLocked).toBe(true);
-    expect(board.spaces[5][4].isLocked).toBe(true);
-    expect(board.spaces[5][5].isLocked).toBe(true);
-    expect(board.spaces[5][6].isLocked).toBe(true);
 });

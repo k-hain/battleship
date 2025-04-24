@@ -6,7 +6,7 @@ class Space {
         this.y = y;
         this.ship = null;
         this.isHit = false;
-        this.isLocked = false;
+        //this.isLocked = false;
     }
 }
 
@@ -85,7 +85,7 @@ export class Gameboard {
                 ship.spaces.push(this.spaces[currX][currY]);
             }
 
-            this.addLockedArea(ship);
+            //this.addLockedArea(ship);
             return true;
         } else {
             return false;
@@ -93,7 +93,7 @@ export class Gameboard {
     }
 
     removeShip(targetShip) {
-        this.removeLockedArea(targetShip);
+        //this.removeLockedArea(targetShip);
 
         for (let space of targetShip.spaces) {
             space.ship = null;
@@ -102,12 +102,12 @@ export class Gameboard {
         targetShip.spaces = [];
         targetShip.x = null;
         targetShip.y = null;
-
+/*
         for (let ship of this.ships) {
             if (ship.x !== null && ship.y !== null) {
                 this.addLockedArea(ship);
             }
-        }
+        }*/
     }
 
     rotateShip(targetShip) {
@@ -149,22 +149,20 @@ export class Gameboard {
     }
 
     validateShipPlacement(ship, x, y) {
-        for (let i = 0; i < ship.length; i++) {
-            const [currX, currY] = this.getShipSegmentCoords(
-                x,
-                y,
-                ship.isHorizontal,
-                i
-            );
+        let validation = true;
 
-            if (
-                this.spaces[currX][currY].ship ||
-                this.spaces[currX][currY].isLocked
-            ) {
-                return false;
+        const dummyShip = new Ship(ship.length, ship.isHorizontal);
+        dummyShip.x = x;
+        dummyShip.y = y;
+
+        this.forEachSpaceOfFootprint(dummyShip, (space) => {
+            if (space.ship) {
+                validation = false;
+                return;
             }
-        }
-        return true;
+        });
+
+        return validation;
     }
 
     receiveAttack(x, y) {
@@ -186,10 +184,27 @@ export class Gameboard {
         return true;
     }
 
-    forEachSpaceAround(ship, callback) {
-        for (let i = -1; i < ship.length + 1; i++) {
-            const targetSpaces = [];
+    forEachSpaceOfFootprint(ship, callback) {
+        const targetSpaces = this.getSpacesAround(ship, true);
 
+        for (let coords of targetSpaces) {
+            callback(this.spaces[coords.x][coords.y]);
+        }
+    }
+
+    forEachSpaceAround(ship, callback) {
+        const targetSpaces = this.getSpacesAround(ship);
+
+        for (let coords of targetSpaces) {
+            callback(this.spaces[coords.x][coords.y]);
+        }
+    }
+
+    getSpacesAround(ship, includeShip) {
+        const spaces = [];
+        const validatedSpaces = [];
+
+        for (let i = -1; i < ship.length + 1; i++) {
             const [currX, currY] = this.getShipSegmentCoords(
                 ship.x,
                 ship.y,
@@ -198,26 +213,28 @@ export class Gameboard {
             );
 
             if (ship.isHorizontal) {
-                targetSpaces.push(
+                spaces.push(
                     { x: currX, y: currY + 1 },
                     { x: currX, y: currY - 1 }
                 );
             } else {
-                targetSpaces.push(
+                spaces.push(
                     { x: currX + 1, y: currY },
                     { x: currX - 1, y: currY }
                 );
             }
-            if (i === -1 || i === ship.length) {
-                targetSpaces.push({ x: currX, y: currY });
-            }
-
-            for (let coords of targetSpaces) {
-                if (this.checkBounds([coords.x, coords.y])) {
-                    callback(this.spaces[coords.x][coords.y]);
-                }
+            if (i === -1 || i === ship.length || includeShip) {
+                spaces.push({ x: currX, y: currY });
             }
         }
+
+        for (let coords of spaces) {
+            if (this.checkBounds([coords.x, coords.y])) {
+                validatedSpaces.push(coords);
+            }
+        }
+
+        return validatedSpaces;
     }
 
     getShipSegmentCoords(x, y, isHorizontal, offset) {
@@ -233,7 +250,7 @@ export class Gameboard {
 
         return [newX, newY];
     }
-
+/*
     addLockedArea(ship) {
         this.forEachSpaceAround(ship, (space) => {
             space.isLocked = true;
@@ -245,7 +262,7 @@ export class Gameboard {
             space.isLocked = false;
         });
     }
-
+*/
     addHitsAround(ship) {
         this.forEachSpaceAround(ship, (space) => {
             if (!space.isHit) {
