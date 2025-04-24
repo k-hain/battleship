@@ -1,4 +1,5 @@
 import { BOARD_WIDTH, SHIP_LENGTHS } from './global-variables.js';
+import { getRandomBool, getRandomCoords } from './helpers.js';
 
 class Space {
     constructor(x, y) {
@@ -6,7 +7,6 @@ class Space {
         this.y = y;
         this.ship = null;
         this.isHit = false;
-        //this.isLocked = false;
     }
 }
 
@@ -60,11 +60,22 @@ export class Gameboard {
     }
 
     setupShips() {
-        let x = 0;
-        let y = 0;
         for (let ship of this.ships) {
-            this.placeShip(ship, x, y);
-            y += 2;
+            ship.isHorizontal = getRandomBool();
+
+            while (true) {
+                const coords = getRandomCoords(BOARD_WIDTH);
+
+                //debuging stuff
+                console.log('placing on board: ' + this.id);
+                console.log(ship);
+                console.log(coords);
+
+                const placed = this.placeShip(ship, coords.x, coords.y);
+                if (placed) {
+                    break;
+                }
+            }
         }
     }
 
@@ -85,7 +96,6 @@ export class Gameboard {
                 ship.spaces.push(this.spaces[currX][currY]);
             }
 
-            //this.addLockedArea(ship);
             return true;
         } else {
             return false;
@@ -93,8 +103,6 @@ export class Gameboard {
     }
 
     removeShip(targetShip) {
-        //this.removeLockedArea(targetShip);
-
         for (let space of targetShip.spaces) {
             space.ship = null;
         }
@@ -102,12 +110,6 @@ export class Gameboard {
         targetShip.spaces = [];
         targetShip.x = null;
         targetShip.y = null;
-/*
-        for (let ship of this.ships) {
-            if (ship.x !== null && ship.y !== null) {
-                this.addLockedArea(ship);
-            }
-        }*/
     }
 
     rotateShip(targetShip) {
@@ -142,7 +144,7 @@ export class Gameboard {
         this.removeShip(targetShip);
 
         const moved = this.placeShip(targetShip, newX, newY);
-        
+
         if (!moved) {
             this.placeShip(targetShip, x, y);
         }
@@ -155,12 +157,27 @@ export class Gameboard {
         dummyShip.x = x;
         dummyShip.y = y;
 
-        this.forEachSpaceOfFootprint(dummyShip, (space) => {
-            if (space.ship) {
-                validation = false;
-                return;
-            }
-        });
+        if (this.checkValidFootprint(dummyShip)) {
+            this.forEachSpaceAround(dummyShip, (space) => {
+                if (space.ship) {
+                    //debuging stuff
+                    console.log(
+                        'ship adjacent to another ship at origin (' +
+                            dummyShip.x +
+                            ',' +
+                            dummyShip.y +
+                            ')'
+                    );
+                    validation = false;
+                }
+            });
+        } else {
+            validation = false;
+        }
+
+        //debuging stuff
+        console.log('validation: ' + validation);
+        console.log(' ');
 
         return validation;
     }
@@ -184,12 +201,41 @@ export class Gameboard {
         return true;
     }
 
-    forEachSpaceOfFootprint(ship, callback) {
-        const targetSpaces = this.getSpacesAround(ship, true);
+    checkValidFootprint(ship) {
+        const spaces = [];
 
-        for (let coords of targetSpaces) {
-            callback(this.spaces[coords.x][coords.y]);
+        for (let i = 0; i < ship.length; i++) {
+            const [currX, currY] = this.getShipSegmentCoords(
+                ship.x,
+                ship.y,
+                ship.isHorizontal,
+                i
+            );
+
+            spaces.push({ x: currX, y: currY });
         }
+
+        for (let coords of spaces) {
+            if (!this.checkBounds([coords.x, coords.y])) {
+                //debuging stuff
+                console.log(
+                    'ship placement out of bounds at origin (' +
+                        ship.x +
+                        ',' +
+                        ship.y +
+                        ')'
+                );
+                return false;
+            } else if (this.spaces[coords.x][coords.y].ship) {
+                //debuging stuff
+                console.log(
+                    'ship placement on occupied (' + ship.x + ',' + ship.y + ')'
+                );
+                return false;
+            }
+        }
+
+        return true;
     }
 
     forEachSpaceAround(ship, callback) {
@@ -200,7 +246,7 @@ export class Gameboard {
         }
     }
 
-    getSpacesAround(ship, includeShip) {
+    getSpacesAround(ship) {
         const spaces = [];
         const validatedSpaces = [];
 
@@ -223,7 +269,7 @@ export class Gameboard {
                     { x: currX - 1, y: currY }
                 );
             }
-            if (i === -1 || i === ship.length || includeShip) {
+            if (i === -1 || i === ship.length) {
                 spaces.push({ x: currX, y: currY });
             }
         }
@@ -250,19 +296,7 @@ export class Gameboard {
 
         return [newX, newY];
     }
-/*
-    addLockedArea(ship) {
-        this.forEachSpaceAround(ship, (space) => {
-            space.isLocked = true;
-        });
-    }
 
-    removeLockedArea(ship) {
-        this.forEachSpaceAround(ship, (space) => {
-            space.isLocked = false;
-        });
-    }
-*/
     addHitsAround(ship) {
         this.forEachSpaceAround(ship, (space) => {
             if (!space.isHit) {

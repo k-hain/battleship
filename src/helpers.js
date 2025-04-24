@@ -9,3 +9,13 @@ export function forEachSpace (spacesArr, callback) {
         }
     }
 }
+
+export function getRandomCoords(max) {
+    return {x: getRandomInt(max), y: getRandomInt(max)};
+}
+
+export function getRandomBool() {
+    const ar = [true, false];
+    const index = Math.round(Math.random());
+    return(ar[index]);
+}
