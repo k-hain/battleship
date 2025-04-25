@@ -7,7 +7,11 @@ import { drawDomElement, clearContents } from './dom-fns.js';
 import moveIcon from './svg/drag_pan_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
 import rotateIcon from './svg/turn_right_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
 import PubSub from 'pubsub-js';
-import { REFRESH_DISPLAY_AND_WIDGETS, START_SHIP_MOVEMENT, PLACE_SHIP } from './event-types.js';
+import {
+    REFRESH_DISPLAY_AND_WIDGETS,
+    START_SHIP_MOVEMENT,
+    PLACE_SHIP,
+} from './event-types.js';
 
 class shipTransformWidget {
     constructor(ship, board) {
@@ -121,11 +125,13 @@ class shipTransformWidget {
         });
 
         moveBtnEl.addEventListener('click', () => {
-            const coords = {x: this.ship.x, y: this.ship.y};
+            const coords = { x: this.ship.x, y: this.ship.y };
             board.data.removeShip(this.ship);
-
-            //push event to the display that we're placing the ship
-            PubSub.publish(START_SHIP_MOVEMENT, {id: this.id, ship: this.ship, coords: coords});
+            PubSub.publish(START_SHIP_MOVEMENT, {
+                id: this.id,
+                ship: this.ship,
+                coords: coords,
+            });
         });
     }
 
@@ -168,8 +174,21 @@ class Display {
                 spaceEl.data = board.spaces[x][y];
                 spaceEl.x = x;
                 spaceEl.y = y;
+                spaceEl.isLocked = false;
             }
         }
+    }
+
+    setLockedSpaces(coordsArr) {
+        for (let coords of coordsArr) {
+            this.spaces[coords.x][coords.y].isLocked = true;
+        }
+    }
+
+    clearLockedSpaces() {
+        forEachSpace(this.spaces, (space) => {
+            space.isLocked = false;
+        });
     }
 
     refresh() {
@@ -226,27 +245,47 @@ class Display {
         this.container.addEventListener('mouseleave', this.mouseLeftContainer);
     }
 
-    mouseLeftContainer = function(evt) {
-        this.container.removeEventListener('mouseleave', this.mouseLeftContainer);
+    mouseLeftContainer = function (evt) {
+        this.container.removeEventListener(
+            'mouseleave',
+            this.mouseLeftContainer
+        );
         this.removeMovementHovers();
-        PubSub.publish(PLACE_SHIP, {id: this.id, ship: this.movedShip, coords: this.movedShipCoords});
+        PubSub.publish(PLACE_SHIP, {
+            id: this.id,
+            ship: this.movedShip,
+            coords: this.movedShipCoords,
+        });
         this.movedShip = null;
         this.movedShipCoords = null;
+        this.clearLockedSpaces();
     }.bind(this);
 
-    displayShipOutline = function(evt) {
+    displayShipOutline = function (evt) {
         evt.stopPropagation();
-        this.getHoveredCoords({x: evt.target.x, y: evt.target.y}, this.movedShip);
-        //pass coords to determine legality of placement
+        const allWithinBounds = this.getHoveredCoords(
+            { x: evt.target.x, y: evt.target.y },
+            this.movedShip
+        );
+        const moveLegal = this.checkLegality();
         for (let coords of this.hoveredCoordsList) {
-            this.spaces[coords.x][coords.y].classList.add('ship-dummy');
+            if (allWithinBounds && moveLegal) {
+                this.spaces[coords.x][coords.y].classList.add('ship-dummy');
+            } else {
+                this.spaces[coords.x][coords.y].classList.add(
+                    'ship-dummy-illegal'
+                );
+            }
         }
     }.bind(this);
 
-    clearShipOutline = function(evt) {
+    clearShipOutline = function (evt) {
         evt.stopPropagation();
         for (let coords of this.hoveredCoordsList) {
             this.spaces[coords.x][coords.y].classList.remove('ship-dummy');
+            this.spaces[coords.x][coords.y].classList.remove(
+                'ship-dummy-illegal'
+            );
         }
         this.hoveredCoordsList = [];
     }.bind(this);
@@ -256,9 +295,18 @@ class Display {
         this.hoveredCoordsList = [];
 
         for (let i = 0; i < ship.length; i++) {
-
-            if (currentCoords.x < BOARD_WIDTH && currentCoords.y < BOARD_WIDTH && currentCoords.x >= 0 && currentCoords.y >= 0) {
-               this.hoveredCoordsList.push({x: currentCoords.x, y: currentCoords.y}); 
+            if (
+                currentCoords.x < BOARD_WIDTH &&
+                currentCoords.y < BOARD_WIDTH &&
+                currentCoords.x >= 0 &&
+                currentCoords.y >= 0
+            ) {
+                this.hoveredCoordsList.push({
+                    x: currentCoords.x,
+                    y: currentCoords.y,
+                });
+            } else {
+                return false;
             }
 
             if (ship.isHorizontal) {
@@ -267,6 +315,18 @@ class Display {
                 currentCoords.y += 1;
             }
         }
+
+        return true;
+    }
+
+    checkLegality() {
+        for (let coords of this.hoveredCoordsList) {
+            if (this.spaces[coords.x][coords.y].isLocked) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     addMovementHovers() {
@@ -354,19 +414,19 @@ export class DisplayController {
     startShipMovement = function (msg, data) {
         let board = this.boards[data.id];
         board.display.refreshBoardAndClearWidgets();
-        const newCoords = board.display.moveShip(data.ship, data.coords);
-/*
-        console.log('will move at board id ' + data.id);
-        console.log('ship to be moved:');
-        console.log(data.ship);
-        console.log('if we fail, place the ship at coords: ' + '(' + data.coords.x + ',' + data.coords.y + ')');*/
+        const lockedSpaces = board.data.getLockedSpaces();
+        board.display.setLockedSpaces(lockedSpaces);
+        board.display.moveShip(data.ship, data.coords);
     }.bind(this);
-    startShipMovementToken = PubSub.subscribe(START_SHIP_MOVEMENT, this.startShipMovement)
+    startShipMovementToken = PubSub.subscribe(
+        START_SHIP_MOVEMENT,
+        this.startShipMovement
+    );
 
-    placeShipAndRefresh = function(msg, data) {
+    placeShipAndRefresh = function (msg, data) {
         let board = this.boards[data.id];
         board.data.placeShip(data.ship, data.coords.x, data.coords.y);
         board.display.refreshBoardAndWidgets(board);
     }.bind(this);
-    placeShipToken = PubSub.subscribe(PLACE_SHIP, this.placeShipAndRefresh)
+    placeShipToken = PubSub.subscribe(PLACE_SHIP, this.placeShipAndRefresh);
 }
