@@ -1,7 +1,7 @@
 /* global document */
 
 import './style.css';
-import { DisplayController } from './display.js';
+import { DisplayController } from './display-controller.js';
 
 const board1El = document.getElementById('board1');
 const board2El = document.getElementById('board2');
