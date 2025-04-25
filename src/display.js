@@ -3,7 +3,7 @@
 import { BOARD_WIDTH } from './global-variables.js';
 import { forEachSpace } from './helpers.js';
 import { Gameboard } from './gameboard.js';
-import { shipTransformWidget } from './ship-transform-widget.js';
+import { ShipTransformWidget } from './ship-transform-widget.js';
 import { drawDomElement } from './dom-fns.js';
 import PubSub from 'pubsub-js';
 import {
@@ -93,7 +93,7 @@ class Display {
 
     addWidgets(board) {
         for (let ship of board.data.ships) {
-            this.widgets.push(new shipTransformWidget(ship, board));
+            this.widgets.push(new ShipTransformWidget(ship, board));
         }
     }
 

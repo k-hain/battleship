@@ -4,7 +4,7 @@ import moveIcon from './svg/drag_pan_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg'
 import rotateIcon from './svg/turn_right_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
 import { START_SHIP_MOVEMENT, REFRESH_DISPLAY_AND_WIDGETS } from "./event-types";
 
-export class shipTransformWidget {
+export class ShipTransformWidget {
     constructor(ship, board) {
         this.id = board.id;
         this.ship = ship;
