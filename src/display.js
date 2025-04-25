@@ -238,19 +238,16 @@ class Display {
         this.addWidgets(board);
     }
 
-    moveShip(ship, coords) {
+    moveShip(ship, coords, lockedSpaces) {
         this.movedShip = ship;
         this.movedShipCoords = coords;
-        this.addMovementHovers(ship);
-        this.container.addEventListener('mouseleave', this.mouseLeftContainer);
+        this.setLockedSpaces(lockedSpaces);
+        console.log(lockedSpaces);
+        this.addMovementListeners();
     }
 
     mouseLeftContainer = function (evt) {
-        this.container.removeEventListener(
-            'mouseleave',
-            this.mouseLeftContainer
-        );
-        this.removeMovementHovers();
+        this.removeMovementListeners();
         PubSub.publish(PLACE_SHIP, {
             id: this.id,
             ship: this.movedShip,
@@ -329,19 +326,29 @@ class Display {
         return true;
     }
 
-    addMovementHovers() {
+    addMovementListeners() {
+        this.container.addEventListener(
+            'mouseleave',
+            this.mouseLeftContainer
+        );
+
         forEachSpace(this.spaces, (el) => {
             el.addEventListener('mouseenter', this.displayShipOutline);
             //click listener to place ship
-            el.addEventListener('mouseleave', this.clearShipOutline);
+            el.addEventListener('mouseleave', this.clearShipOutline);  
         });
     }
 
-    removeMovementHovers() {
+    removeMovementListeners() {
+        this.container.removeEventListener(
+            'mouseleave',
+            this.mouseLeftContainer
+        );
+
         forEachSpace(this.spaces, (el) => {
             el.removeEventListener('mouseenter', this.displayShipOutline);
             //click listener to place ship
-            el.removeEventListener('mouseleave', this.clearShipOutline);
+            el.removeEventListener('mouseleave', this.clearShipOutline);       
         });
     }
 }
@@ -415,8 +422,8 @@ export class DisplayController {
         let board = this.boards[data.id];
         board.display.refreshBoardAndClearWidgets();
         const lockedSpaces = board.data.getLockedSpaces();
-        board.display.setLockedSpaces(lockedSpaces);
-        board.display.moveShip(data.ship, data.coords);
+        //board.display.setLockedSpaces(lockedSpaces);
+        board.display.moveShip(data.ship, data.coords, lockedSpaces);
     }.bind(this);
     startShipMovementToken = PubSub.subscribe(
         START_SHIP_MOVEMENT,
