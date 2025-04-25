@@ -246,6 +246,31 @@ class Display {
         this.addMovementListeners();
     }
 
+    placeShipOnHovered = function(evt) {
+        /*
+        TODO perhaps refactor this to check game logic instead of styling on the board?
+        */
+        let legal = true;
+
+        forEachSpace(this.spaces, (spaceEl) => {
+            if (spaceEl.classList.contains('ship-dummy-illegal')) {
+                legal = false;
+            }
+        });
+
+        if (legal) {
+            this.removeMovementListeners();
+            PubSub.publish(PLACE_SHIP, {
+                id: this.id,
+                ship: this.movedShip,
+                coords: {x: evt.target.x, y: evt.target.y},
+            });
+            this.resetMovementVars();
+            this.clearLockedSpaces(); 
+        }
+        //TODO fire mouseenter after ship was placed?
+    }.bind(this);
+
     mouseLeftContainer = function (evt) {
         this.removeMovementListeners();
         PubSub.publish(PLACE_SHIP, {
@@ -253,8 +278,7 @@ class Display {
             ship: this.movedShip,
             coords: this.movedShipCoords,
         });
-        this.movedShip = null;
-        this.movedShipCoords = null;
+        this.resetMovementVars();
         this.clearLockedSpaces();
     }.bind(this);
 
@@ -334,7 +358,7 @@ class Display {
 
         forEachSpace(this.spaces, (el) => {
             el.addEventListener('mouseenter', this.displayShipOutline);
-            //click listener to place ship
+            el.addEventListener('click', this.placeShipOnHovered);
             el.addEventListener('mouseleave', this.clearShipOutline);  
         });
     }
@@ -347,9 +371,15 @@ class Display {
 
         forEachSpace(this.spaces, (el) => {
             el.removeEventListener('mouseenter', this.displayShipOutline);
-            //click listener to place ship
+            el.removeEventListener('click', this.placeShipOnHovered);
             el.removeEventListener('mouseleave', this.clearShipOutline);       
         });
+    }
+
+    resetMovementVars() {
+        this.movedShip = null;
+        this.movedShipCoords = null;
+        this.hoveredCoordsList = [];
     }
 }
 
