@@ -242,7 +242,6 @@ class Display {
         this.movedShip = ship;
         this.movedShipCoords = coords;
         this.setLockedSpaces(lockedSpaces);
-        console.log(lockedSpaces);
         this.addMovementListeners();
     }
 
@@ -260,26 +259,26 @@ class Display {
 
         if (legal) {
             this.removeMovementListeners();
+            this.clearLockedSpaces(); 
             PubSub.publish(PLACE_SHIP, {
                 id: this.id,
                 ship: this.movedShip,
                 coords: {x: evt.target.x, y: evt.target.y},
+                highlightAfterPlacement: true,
             });
             this.resetMovementVars();
-            this.clearLockedSpaces(); 
         }
-        //TODO fire mouseenter after ship was placed?
     }.bind(this);
 
     mouseLeftContainer = function (evt) {
         this.removeMovementListeners();
+        this.clearLockedSpaces();
         PubSub.publish(PLACE_SHIP, {
             id: this.id,
             ship: this.movedShip,
             coords: this.movedShipCoords,
         });
         this.resetMovementVars();
-        this.clearLockedSpaces();
     }.bind(this);
 
     displayShipOutline = function (evt) {
@@ -464,6 +463,10 @@ export class DisplayController {
         let board = this.boards[data.id];
         board.data.placeShip(data.ship, data.coords.x, data.coords.y);
         board.display.refreshBoardAndWidgets(board);
+        if (data.highlightAfterPlacement) {
+            const evt = new Event('mouseenter');
+            board.display.spaces[data.coords.x][data.coords.y].dispatchEvent(evt);
+        }
     }.bind(this);
     placeShipToken = PubSub.subscribe(PLACE_SHIP, this.placeShipAndRefresh);
 }
