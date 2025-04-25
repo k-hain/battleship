@@ -321,7 +321,7 @@ export class Gameboard {
         const lockedSpaces = [];
 
         for (let ship of this.ships) {
-            if (ship.x && ship.y) {
+            if (ship.x !== null && ship.y !== null) {
                 for (let shipSpace of ship.spaces) {
                     lockedSpaces.push(shipSpace);
                 }
