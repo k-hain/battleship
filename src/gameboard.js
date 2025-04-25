@@ -136,7 +136,7 @@ export class Gameboard {
             this.placeShip(targetShip, x, y);
             return false;
         }
-        
+
         return true;
     }
 
@@ -315,5 +315,27 @@ export class Gameboard {
             }
         }
         return true;
+    }
+
+    getLockedSpaces() {
+        const lockedSpaces = [];
+
+        for (let ship of this.ships) {
+            if (ship.x && ship.y) {
+                for (let shipSpace of ship.spaces) {
+                    lockedSpaces.push(shipSpace);
+                }
+
+                const spacesAround = this.getSpacesAround(ship);
+
+                for (let space of spacesAround) {
+                    if (!lockedSpaces.includes(space)) {
+                        lockedSpaces.push(space);
+                    }
+                }
+            }
+        }
+
+        return lockedSpaces;
     }
 }
