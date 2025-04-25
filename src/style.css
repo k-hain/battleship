@@ -105,7 +105,7 @@ button {
     appearance: none;
 }
 
-button:hover, .space-interactive:hover {
+button:hover, .space-interactive:hover, .space {
     cursor: pointer;
 }
 
