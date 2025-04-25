@@ -8,3 +8,5 @@ export const START_PLAYER_SETUP = Symbol('START_PLAYER_SETUP');
 export const START_GAME = Symbol('START_GAME');
 //
 export const REFRESH_DISPLAY_AND_WIDGETS = Symbol('REFRESH_DISPLAY_AND_WIDGETS');
+export const START_SHIP_MOVEMENT = Symbol('START_SHIP_MOVEMENT');
+export const PLACE_SHIP = Symbol('PLACE_SHIP');

@@ -184,3 +184,15 @@ button:hover, .space-interactive:hover {
 .space-hover .board-button {
     display: initial;
 }
+
+.ship-dummy {
+    background-color: rgb(80, 184, 202);
+}
+
+.space-ship.ship-dummy {
+    background-color: rgb(216, 106, 73);
+}
+
+.ship-dummy-illegal {
+    background-color: rgb(221, 30, 157);
+}
