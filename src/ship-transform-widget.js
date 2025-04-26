@@ -5,18 +5,18 @@ import rotateIcon from './svg/turn_right_24dp_000000_FILL0_wght400_GRAD0_opsz24.
 import { START_SHIP_MOVEMENT, ROTATE_SHIP } from "./event-types";
 
 export class ShipTransformWidget {
-    constructor(ship, board) {
-        this.id = board.id;
+    constructor(id, ship, domSpaces) {
+        this.id = id;
         this.ship = ship;
-        this.spaces = this.getShipSpaces(ship, board);
-        this.moveBtnContainer = this.getMoveBtnContainer(ship, board);
-        this.rotateBtnContainer = this.getRotateBtnContainer(ship, board);
-        this.init(board);
+        this.spaces = [];
+        this.moveBtnContainer, this.rotateBtnContainer;
+        this.setShipSpaces(domSpaces, ship);
+        this.init();
     }
 
-    init(board) {
+    init() {
         this.addHovers();
-        this.addButtons(board);
+        this.addButtons();
     }
 
     clear() {
@@ -25,25 +25,21 @@ export class ShipTransformWidget {
         this.removeHovers();
     }
 
-    getShipSpaces(ship, board) {
-        const domSpaces = [];
-
+    setShipSpaces(domSpaces, ship) {
         for (let space of ship.spaces) {
-            domSpaces.push(board.display.spaces[space.x][space.y]);
+            this.spaces.push(domSpaces[space.x][space.y]);
         }
 
-        return domSpaces;
+        this.moveBtnContainer = domSpaces[ship.x][ship.y];
+
+        this.setRotateBtnContainer(domSpaces, ship);
     }
 
-    getMoveBtnContainer(ship, board) {
-        return board.display.spaces[ship.x][ship.y];
-    }
-
-    getRotateBtnContainer(ship, board) {
-        if (ship.isHorizontal) {
-            return board.display.spaces[ship.x + 1][ship.y];
+    setRotateBtnContainer(domSpaces, ship) {
+        if (this.ship.isHorizontal) {
+            this.rotateBtnContainer = domSpaces[ship.x + 1][ship.y];
         } else {
-            return board.display.spaces[ship.x][ship.y + 1];
+            this.rotateBtnContainer = domSpaces[ship.x][ship.y + 1];
         }
     }
 
@@ -79,7 +75,7 @@ export class ShipTransformWidget {
         }
     }
 
-    addButtons(board) {
+    addButtons() {
         const moveBtnEl = drawDomElement({
             type: 'button',
             container: this.moveBtnContainer,
@@ -111,12 +107,10 @@ export class ShipTransformWidget {
         });
 
         moveBtnEl.addEventListener('click', () => {
-            const coords = { x: this.ship.x, y: this.ship.y };
-            board.data.removeShip(this.ship);
             PubSub.publish(START_SHIP_MOVEMENT, {
                 id: this.id,
                 ship: this.ship,
-                coords: coords,
+                coords: { x: this.ship.x, y: this.ship.y },
             });
         });
     }

@@ -87,7 +87,7 @@ export class Display {
 
     addWidgets(board) {
         for (let ship of board.data.ships) {
-            this.widgets.push(new ShipTransformWidget(ship, board));
+            this.widgets.push(new ShipTransformWidget(this.id, ship, this.spaces));
         }
     }
 

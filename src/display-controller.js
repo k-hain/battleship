@@ -89,6 +89,7 @@ export class DisplayController {
 
     startShipMovement = function (msg, data) {
         let board = this.boards[data.id];
+        board.data.removeShip(data.ship);
         board.display.refreshBoardAndClearWidgets();
         const lockedSpaces = board.data.getLockedSpaces();
         board.display.moveShip(data.ship, data.coords, lockedSpaces);
