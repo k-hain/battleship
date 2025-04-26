@@ -11,8 +11,13 @@ import {
     ROTATE_SHIP,
 } from './event-types';
 
+const board1El = document.getElementById('board1');
+const board2El = document.getElementById('board2');
+const player1NameEl = document.getElementById('player1-name');
+const player2NameEl = document.getElementById('player2-name');
+
 export class DisplayController {
-    constructor(board1El, player1NameEl, board2El, player2NameEl) {
+    constructor() {
         this.board1El = board1El;
         this.player1NameEl = player1NameEl;
         this.board2El = board2El;
