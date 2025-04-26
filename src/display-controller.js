@@ -19,12 +19,17 @@ const player2NameEl = document.getElementById('player2-name');
 
 export class DisplayController {
     constructor() {
-        this.board1El = board1El;
-        this.player1NameEl = player1NameEl;
-        this.board2El = board2El;
-        this.player2NameEl = player2NameEl;
+        this.domEls = [
+            {
+                board: board1El,
+                playerName: player1NameEl,
+            },
+            {
+                board: board2El,
+                playerName: player2NameEl,
+            },
+        ];
 
-        this.board1, this.board1Display, this.board2, this.board2Display;
         this.boards = [];
         this.game = new Game();
 
@@ -32,24 +37,21 @@ export class DisplayController {
     }
 
     initBoards() {
-        this.board1 = new Gameboard(this.game.players[0].id);
-        this.board1Display = new Display(
-            this.game.players[0].id,
-            this.board1El,
-            this.player1NameEl,
-            this.game.players[0].name
-        );
-        this.board2 = new Gameboard(this.game.players[1].id);
-        this.board2Display = new Display(
-            this.game.players[1].id,
-            this.board2El,
-            this.player2NameEl,
-            this.game.players[1].name
-        );
-        this.boards = [
-            { id: 0, data: this.board1, display: this.board1Display },
-            { id: 1, data: this.board2, display: this.board2Display },
-        ];
+        for (let player of this.game.players) {
+            const board = new Gameboard(player.id);
+            const boardDisplay = new Display(
+                player.id,
+                this.domEls[player.id].board,
+                this.domEls[player.id].playerName,
+                player.name,
+            );
+
+            this.boards.push({
+                id: player.id,
+                data: board,
+                display: boardDisplay,
+            });
+        }
 
         for (let board of this.boards) {
             board.data.setupShips();
