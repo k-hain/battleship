@@ -2,7 +2,7 @@ import PubSub from "pubsub-js";
 import { drawDomElement, clearContents } from "./dom-fns";
 import moveIcon from './svg/drag_pan_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
 import rotateIcon from './svg/turn_right_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
-import { START_SHIP_MOVEMENT, REFRESH_DISPLAY_AND_WIDGETS } from "./event-types";
+import { START_SHIP_MOVEMENT, ROTATE_SHIP } from "./event-types";
 
 export class ShipTransformWidget {
     constructor(ship, board) {
@@ -107,12 +107,7 @@ export class ShipTransformWidget {
         });
 
         rotateBtnEl.addEventListener('click', () => {
-            const rotated = board.data.rotateShip(this.ship);
-
-            if (rotated) {
-                this.clear();
-                PubSub.publish(REFRESH_DISPLAY_AND_WIDGETS, this.id);
-            }
+            PubSub.publish(ROTATE_SHIP, {id: this.id, ship: this.ship});
         });
 
         moveBtnEl.addEventListener('click', () => {
