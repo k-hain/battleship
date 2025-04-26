@@ -78,6 +78,7 @@ export class DisplayController {
 
     boardSetupRefresh = function (msg, id) {
         const board = this.boards[id];
+
         board.display.refreshBoardAndWidgets(board.data);
     }.bind(this);
     boardSetupRefreshToken = PubSub.subscribe(
@@ -87,8 +88,11 @@ export class DisplayController {
 
     startShipMovement = function (msg, data) {
         let board = this.boards[data.id];
+
         board.data.removeShip(data.ship);
+
         board.display.refreshBoardAndClearWidgets(board.data);
+
         const lockedSpaces = board.data.getLockedSpaces();
         board.display.moveShip(data.ship, data.coords, lockedSpaces);
     }.bind(this);
@@ -125,6 +129,7 @@ export class DisplayController {
 
     roateShip = function (msg, data) {
         const board = this.boards[data.id];
+
         const rotated = board.data.rotateShip(data.ship);
 
         if (rotated) {
