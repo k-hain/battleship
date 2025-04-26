@@ -99,8 +99,21 @@ export class DisplayController {
 
     placeShipAndRefresh = function (msg, data) {
         let board = this.boards[data.id];
-        board.data.placeShip(data.ship, data.coords.x, data.coords.y);
-        board.display.refreshBoardAndWidgets(board.data);
+
+        const placed = board.data.placeShip(
+            data.ship,
+            data.coords.x,
+            data.coords.y
+        );
+
+        if (placed) {
+            board.display.doAfterPlacement();
+            board.display.refreshBoardAndWidgets(board.data);
+        } else {
+            const lockedSpaces = board.data.getLockedSpaces();
+            board.display.doAfterFailedPlacement(lockedSpaces);
+        }
+
         if (data.highlightAfterPlacement) {
             const evt = new Event('mouseenter');
             board.display.spaces[data.coords.x][data.coords.y].dispatchEvent(

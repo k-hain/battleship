@@ -111,29 +111,25 @@ export class Display {
     }
 
     placeShipOnHovered = function (evt) {
-        /*
-        TODO perhaps refactor this to check game logic instead of styling on the board?
-        */
-        let legal = true;
-
-        forEachSpace(this.spaces, (spaceEl) => {
-            if (spaceEl.classList.contains('ship-dummy-illegal')) {
-                legal = false;
-            }
+        this.removeMovementListeners();
+        this.clearLockedSpaces();
+        
+        PubSub.publish(PLACE_SHIP, {
+            id: this.id,
+            ship: this.#movedShip,
+            coords: { x: evt.target.x, y: evt.target.y },
+            highlightAfterPlacement: true,
         });
-
-        if (legal) {
-            this.removeMovementListeners();
-            this.clearLockedSpaces();
-            PubSub.publish(PLACE_SHIP, {
-                id: this.id,
-                ship: this.#movedShip,
-                coords: { x: evt.target.x, y: evt.target.y },
-                highlightAfterPlacement: true,
-            });
-            this.resetMovementVars();
-        }
     }.bind(this);
+
+    doAfterFailedPlacement (lockedSpaces) {
+        this.setLockedSpaces(lockedSpaces);
+        this.addMovementListeners();
+    }
+
+    doAfterPlacement() {
+        this.resetMovementVars();
+    }
 
     mouseLeftContainer = function (evt) {
         this.removeMovementListeners();
