@@ -6,6 +6,10 @@ import PubSub from 'pubsub-js';
 import { PLACE_SHIP } from './event-types.js';
 
 export class Display {
+    #movedShip = null;
+    #movedShipCoords = null;
+    #hoveredCoordsList = [];
+
     constructor(id, boardEl, board, playerNameEl, playerName) {
         this.id = id;
         this.spaces = [];
@@ -13,9 +17,6 @@ export class Display {
         this.createSpaces(boardEl, board);
         this.container = boardEl;
         this.widgets = [];
-        this.movedShip = null;
-        this.movedShipCoords = null;
-        this.hoveredCoordsList = [];
     }
 
     addName(playerNameEl, playerName) {
@@ -103,8 +104,8 @@ export class Display {
     }
 
     moveShip(ship, coords, lockedSpaces) {
-        this.movedShip = ship;
-        this.movedShipCoords = coords;
+        this.#movedShip = ship;
+        this.#movedShipCoords = coords;
         this.setLockedSpaces(lockedSpaces);
         this.addMovementListeners();
     }
@@ -126,7 +127,7 @@ export class Display {
             this.clearLockedSpaces();
             PubSub.publish(PLACE_SHIP, {
                 id: this.id,
-                ship: this.movedShip,
+                ship: this.#movedShip,
                 coords: { x: evt.target.x, y: evt.target.y },
                 highlightAfterPlacement: true,
             });
@@ -139,8 +140,8 @@ export class Display {
         this.clearLockedSpaces();
         PubSub.publish(PLACE_SHIP, {
             id: this.id,
-            ship: this.movedShip,
-            coords: this.movedShipCoords,
+            ship: this.#movedShip,
+            coords: this.#movedShipCoords,
         });
         this.resetMovementVars();
     }.bind(this);
@@ -149,10 +150,10 @@ export class Display {
         evt.stopPropagation();
         const allWithinBounds = this.getHoveredCoords(
             { x: evt.target.x, y: evt.target.y },
-            this.movedShip
+            this.#movedShip
         );
         const moveLegal = this.checkLegality();
-        for (let coords of this.hoveredCoordsList) {
+        for (let coords of this.#hoveredCoordsList) {
             if (allWithinBounds && moveLegal) {
                 this.spaces[coords.x][coords.y].classList.add('ship-dummy');
             } else {
@@ -165,18 +166,18 @@ export class Display {
 
     clearShipOutline = function (evt) {
         evt.stopPropagation();
-        for (let coords of this.hoveredCoordsList) {
+        for (let coords of this.#hoveredCoordsList) {
             this.spaces[coords.x][coords.y].classList.remove('ship-dummy');
             this.spaces[coords.x][coords.y].classList.remove(
                 'ship-dummy-illegal'
             );
         }
-        this.hoveredCoordsList = [];
+        this.#hoveredCoordsList = [];
     }.bind(this);
 
     getHoveredCoords(hoveredCoords, ship) {
         let currentCoords = hoveredCoords;
-        this.hoveredCoordsList = [];
+        this.#hoveredCoordsList = [];
 
         for (let i = 0; i < ship.length; i++) {
             if (
@@ -185,7 +186,7 @@ export class Display {
                 currentCoords.x >= 0 &&
                 currentCoords.y >= 0
             ) {
-                this.hoveredCoordsList.push({
+                this.#hoveredCoordsList.push({
                     x: currentCoords.x,
                     y: currentCoords.y,
                 });
@@ -204,7 +205,7 @@ export class Display {
     }
 
     checkLegality() {
-        for (let coords of this.hoveredCoordsList) {
+        for (let coords of this.#hoveredCoordsList) {
             if (this.spaces[coords.x][coords.y].isLocked) {
                 return false;
             }
@@ -237,8 +238,8 @@ export class Display {
     }
 
     resetMovementVars() {
-        this.movedShip = null;
-        this.movedShipCoords = null;
-        this.hoveredCoordsList = [];
+        this.#movedShip = null;
+        this.#movedShipCoords = null;
+        this.#hoveredCoordsList = [];
     }
 }
