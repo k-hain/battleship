@@ -12,20 +12,32 @@ import {
 
 export class DisplayController {
     constructor(board1El, player1NameEl, board2El, player2NameEl) {
+        this.board1El = board1El;
+        this.player1NameEl = player1NameEl;
+        this.board2El = board2El;
+        this.player2NameEl = player2NameEl;
+
+        this.board1, this.board1Display, this.board2, this.board2Display;
+        this.boards = [];
+
+        this.initBoards();
+    }
+
+    initBoards() {
         this.board1 = new Gameboard(0);
         this.board1Display = new Display(
             0,
-            board1El,
+            this.board1El,
             this.board1,
-            player1NameEl,
+            this.player1NameEl,
             'Player'
         );
         this.board2 = new Gameboard(1);
         this.board2Display = new Display(
             1,
-            board2El,
+            this.board2El,
             this.board2,
-            player2NameEl,
+            this.player2NameEl,
             'Computer'
         );
         this.boards = [
@@ -33,20 +45,18 @@ export class DisplayController {
             { id: 1, data: this.board2, display: this.board2Display },
         ];
 
-        this.initBoards(this.boards);
-        this.boardSetup(this.boards[0]);
-    }
-
-    initBoards(boards) {
-        for (let board of boards) {
+        for (let board of this.boards) {
             board.data.setupShips();
             board.display.refresh();
         }
+
+        this.boardSetup(this.boards[0]);
     }
 
     boardSetup(board) {
         const infoWrapperEl = document.querySelector('.info-wrapper');
 
+        // eslint-disable-next-line no-unused-vars
         const infoEl = drawDomElement({
             type: 'div',
             container: infoWrapperEl,
@@ -61,7 +71,9 @@ export class DisplayController {
             text: 'Start Game',
         });
 
-        startButtonEl.addEventListener('click', () => {});
+        startButtonEl.addEventListener('click', () => {
+            //logic to start new game
+        });
         board.display.addWidgets(board);
     }
 
