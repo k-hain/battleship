@@ -10,11 +10,11 @@ export class Display {
     #movedShipCoords = null;
     #hoveredCoordsList = [];
 
-    constructor(id, boardEl, board, playerNameEl, playerName) {
+    constructor(id, boardEl, playerNameEl, playerName) {
         this.id = id;
         this.spaces = [];
         this.addName(playerNameEl, playerName);
-        this.createSpaces(boardEl, board);
+        this.createSpaces(boardEl);
         this.container = boardEl;
         this.widgets = [];
     }
@@ -23,7 +23,7 @@ export class Display {
         playerNameEl.textContent = playerName;
     }
 
-    createSpaces(boardEl, board) {
+    createSpaces(boardEl) {
         for (let x = 0; x < BOARD_WIDTH; x++) {
             this.spaces.push(new Array());
 
@@ -36,7 +36,6 @@ export class Display {
                 this.spaces[x].push(spaceEl);
                 spaceEl.style.gridRow = `${y + 1} / span 1`;
                 spaceEl.style.gridColumn = `${x + 1} / span 1`;
-                spaceEl.data = board.spaces[x][y];
                 spaceEl.x = x;
                 spaceEl.y = y;
                 spaceEl.isLocked = false;
@@ -56,38 +55,39 @@ export class Display {
         });
     }
 
-    refresh() {
-        forEachSpace(this.spaces, (spaceEl) => {
-            spaceEl.className = 'space';
-            if (this.id === 1 && !spaceEl.data.isHit) {
-                spaceEl.classList.add('space-hidden');
+    refresh(boardData) {
+        forEachSpace(this.spaces, (el) => {
+            el.className = 'space';
+            if (this.id === 1 && !boardData.spaces[el.x][el.y].isHit) {
+                el.classList.add('space-hidden');
             } else {
-                if (spaceEl.data.ship) {
-                    spaceEl.classList.add('space-ship');
+                if (boardData.spaces[el.x][el.y].ship) {
+                    el.classList.add('space-ship');
+                } else {
+                    el.classList.add('space-empty');
                 }
-                if (spaceEl.data.isHit) {
-                    spaceEl.textContent = 'X';
-                }
-                if (!spaceEl.data.ship) {
-                    spaceEl.classList.add('space-empty');
+                if (boardData.spaces[el.x][el.y].isHit) {
+                    el.textContent = 'X';
                 }
             }
         });
     }
 
-    refreshBoardAndWidgets(board) {
-        this.refresh();
-        this.resetWidgets(board);
+    refreshBoardAndWidgets(boardData) {
+        this.refresh(boardData);
+        this.resetWidgets(boardData);
     }
 
-    refreshBoardAndClearWidgets() {
-        this.refresh();
+    refreshBoardAndClearWidgets(boardData) {
+        this.refresh(boardData);
         this.clearWidgets();
     }
 
-    addWidgets(board) {
-        for (let ship of board.data.ships) {
-            this.widgets.push(new ShipTransformWidget(this.id, ship, this.spaces));
+    addWidgets(boardData) {
+        for (let ship of boardData.ships) {
+            this.widgets.push(
+                new ShipTransformWidget(this.id, ship, this.spaces)
+            );
         }
     }
 
@@ -98,9 +98,9 @@ export class Display {
         this.widgets = [];
     }
 
-    resetWidgets(board) {
+    resetWidgets(boardData) {
         this.clearWidgets();
-        this.addWidgets(board);
+        this.addWidgets(boardData);
     }
 
     moveShip(ship, coords, lockedSpaces) {

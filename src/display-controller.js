@@ -29,7 +29,6 @@ export class DisplayController {
         this.board1Display = new Display(
             0,
             this.board1El,
-            this.board1,
             this.player1NameEl,
             'Player'
         );
@@ -37,7 +36,6 @@ export class DisplayController {
         this.board2Display = new Display(
             1,
             this.board2El,
-            this.board2,
             this.player2NameEl,
             'Computer'
         );
@@ -48,7 +46,7 @@ export class DisplayController {
 
         for (let board of this.boards) {
             board.data.setupShips();
-            board.display.refresh();
+            board.display.refresh(board.data);
         }
 
         this.boardSetup(this.boards[0]);
@@ -75,12 +73,12 @@ export class DisplayController {
         startButtonEl.addEventListener('click', () => {
             //logic to start new game
         });
-        board.display.addWidgets(board);
+        board.display.addWidgets(board.data);
     }
 
     boardSetupRefresh = function (msg, id) {
         const board = this.boards[id];
-        board.display.refreshBoardAndWidgets(board);
+        board.display.refreshBoardAndWidgets(board.data);
     }.bind(this);
     boardSetupRefreshToken = PubSub.subscribe(
         REFRESH_DISPLAY_AND_WIDGETS,
@@ -90,7 +88,7 @@ export class DisplayController {
     startShipMovement = function (msg, data) {
         let board = this.boards[data.id];
         board.data.removeShip(data.ship);
-        board.display.refreshBoardAndClearWidgets();
+        board.display.refreshBoardAndClearWidgets(board.data);
         const lockedSpaces = board.data.getLockedSpaces();
         board.display.moveShip(data.ship, data.coords, lockedSpaces);
     }.bind(this);
@@ -102,7 +100,7 @@ export class DisplayController {
     placeShipAndRefresh = function (msg, data) {
         let board = this.boards[data.id];
         board.data.placeShip(data.ship, data.coords.x, data.coords.y);
-        board.display.refreshBoardAndWidgets(board);
+        board.display.refreshBoardAndWidgets(board.data);
         if (data.highlightAfterPlacement) {
             const evt = new Event('mouseenter');
             board.display.spaces[data.coords.x][data.coords.y].dispatchEvent(
