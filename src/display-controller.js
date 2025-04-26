@@ -1,9 +1,10 @@
 /* global Event, document */
 
 import PubSub from 'pubsub-js';
-import { Gameboard } from './gameboard';
-import { Display } from './display';
+import { Gameboard } from './gameboard.js';
+import { Display } from './display.js';
 import { drawDomElement } from './dom-fns';
+import { Game } from './game.js';
 import {
     REFRESH_DISPLAY_AND_WIDGETS,
     START_SHIP_MOVEMENT,
@@ -25,24 +26,25 @@ export class DisplayController {
 
         this.board1, this.board1Display, this.board2, this.board2Display;
         this.boards = [];
+        this.game = new Game();
 
         this.initBoards();
     }
 
     initBoards() {
-        this.board1 = new Gameboard(0);
+        this.board1 = new Gameboard(this.game.players[0].id);
         this.board1Display = new Display(
-            0,
+            this.game.players[0].id,
             this.board1El,
             this.player1NameEl,
-            'Player'
+            this.game.players[0].name
         );
-        this.board2 = new Gameboard(1);
+        this.board2 = new Gameboard(this.game.players[1].id);
         this.board2Display = new Display(
-            1,
+            this.game.players[1].id,
             this.board2El,
             this.player2NameEl,
-            'Computer'
+            this.game.players[1].name
         );
         this.boards = [
             { id: 0, data: this.board1, display: this.board1Display },
