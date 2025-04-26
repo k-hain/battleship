@@ -113,7 +113,7 @@ export class Display {
     placeShipOnHovered = function (evt) {
         this.removeMovementListeners();
         this.clearLockedSpaces();
-        
+
         PubSub.publish(PLACE_SHIP, {
             id: this.id,
             ship: this.#movedShip,
@@ -122,7 +122,7 @@ export class Display {
         });
     }.bind(this);
 
-    doAfterFailedPlacement (lockedSpaces) {
+    doAfterFailedPlacement(lockedSpaces) {
         this.setLockedSpaces(lockedSpaces);
         this.addMovementListeners();
     }
@@ -131,7 +131,7 @@ export class Display {
         this.resetMovementVars();
     }
 
-    mouseLeftContainer = function (evt) {
+    mouseLeftContainer = function () {
         this.removeMovementListeners();
         this.clearLockedSpaces();
         PubSub.publish(PLACE_SHIP, {
