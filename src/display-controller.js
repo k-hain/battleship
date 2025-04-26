@@ -8,7 +8,7 @@ import {
     REFRESH_DISPLAY_AND_WIDGETS,
     START_SHIP_MOVEMENT,
     PLACE_SHIP,
-    ROTATE_SHIP
+    ROTATE_SHIP,
 } from './event-types';
 
 export class DisplayController {
@@ -112,7 +112,7 @@ export class DisplayController {
     }.bind(this);
     placeShipToken = PubSub.subscribe(PLACE_SHIP, this.placeShipAndRefresh);
 
-    roateShip = function(msg, data) {
+    roateShip = function (msg, data) {
         const board = this.boards[data.id];
         const rotated = board.data.rotateShip(data.ship);
 
