@@ -66,11 +66,6 @@ export class Gameboard {
             while (true) {
                 const coords = getRandomCoords(BOARD_WIDTH);
 
-                //debuging stuff
-                console.log('placing on board: ' + this.id);
-                console.log(ship);
-                console.log(coords);
-
                 const placed = this.placeShip(ship, coords.x, coords.y);
                 if (placed) {
                     break;
@@ -163,24 +158,12 @@ export class Gameboard {
         if (this.checkValidFootprint(dummyShip)) {
             this.forEachSpaceAround(dummyShip, (space) => {
                 if (space.ship) {
-                    //debuging stuff
-                    console.log(
-                        'ship adjacent to another ship at origin (' +
-                            dummyShip.x +
-                            ',' +
-                            dummyShip.y +
-                            ')'
-                    );
                     validation = false;
                 }
             });
         } else {
             validation = false;
         }
-
-        //debuging stuff
-        console.log('validation: ' + validation);
-        console.log(' ');
 
         return validation;
     }
@@ -220,20 +203,8 @@ export class Gameboard {
 
         for (let coords of spaces) {
             if (!this.checkBounds([coords.x, coords.y])) {
-                //debuging stuff
-                console.log(
-                    'ship placement out of bounds at origin (' +
-                        ship.x +
-                        ',' +
-                        ship.y +
-                        ')'
-                );
                 return false;
             } else if (this.spaces[coords.x][coords.y].ship) {
-                //debuging stuff
-                console.log(
-                    'ship placement on occupied (' + ship.x + ',' + ship.y + ')'
-                );
                 return false;
             }
         }
