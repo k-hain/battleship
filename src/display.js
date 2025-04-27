@@ -3,7 +3,7 @@ import { forEachSpace } from './helpers.js';
 import { ShipTransformWidget } from './ship-transform-widget.js';
 import { drawDomElement } from './dom-fns.js';
 import PubSub from 'pubsub-js';
-import { PLACE_SHIP } from './event-types.js';
+import { PLACE_SHIP, ATTACK_SPACE } from './event-types.js';
 
 export class Display {
     #movedShip = null;
@@ -237,5 +237,30 @@ export class Display {
         this.#movedShip = null;
         this.#movedShipCoords = null;
         this.#hoveredCoordsList = [];
+    }
+
+    attackSpace = function (evt) {
+        PubSub.publish(ATTACK_SPACE, {
+            id: this.id,
+            x: evt.target.x,
+            y: evt.target.y,
+        });
+    }.bind(this);
+
+    addAttackListeners(boardSpaces) {
+        forEachSpace(boardSpaces, (space) => {
+            if (!space.isHit) {
+                this.spaces[space.x][space.y].addEventListener(
+                    'click',
+                    this.attackSpace
+                );
+            }
+        });
+    }
+
+    removeAttackListeners() {
+        forEachSpace(this.spaces, (el) => {
+            el.removeEventListener('click', this.attackSpace);
+        });
     }
 }

@@ -1,13 +1,8 @@
-export const PUBLISH_PLAYER_NAMES = Symbol('PUBLISH_PLAYER_NAMES');
-export const FETCH_PLAYER_NAMES = Symbol('FETCH_PLAYER_NAMES');
-export const PUBLISH_BOARD_SPACES = Symbol('PUBLISH_BOARD_SPACES');
-export const FETCH_BOARD_SPACES = Symbol('FETCH_BOARD_SPACES');
 export const START_PLAYER_ROUND = Symbol('START_PLAYER_ROUND');
+export const START_COMPUTER_ROUND = Symbol('START_COMPUTER_ROUND');
 export const ATTACK_SPACE = Symbol('ATTACK_SPACE');
-export const START_PLAYER_SETUP = Symbol('START_PLAYER_SETUP');
-export const START_GAME = Symbol('START_GAME');
-//
 export const REFRESH_DISPLAY_AND_WIDGETS = Symbol('REFRESH_DISPLAY_AND_WIDGETS');
 export const START_SHIP_MOVEMENT = Symbol('START_SHIP_MOVEMENT');
 export const PLACE_SHIP = Symbol('PLACE_SHIP');
 export const ROTATE_SHIP = Symbol('ROTATE_SHIP');
+export const END_GAME = Symbol('END_GAME');

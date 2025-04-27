@@ -3,13 +3,17 @@
 import PubSub from 'pubsub-js';
 import { Gameboard } from './gameboard.js';
 import { Display } from './display.js';
-import { drawDomElement } from './dom-fns';
+import { clearContents, drawDomElement } from './dom-fns';
 import { Game } from './game.js';
 import {
     REFRESH_DISPLAY_AND_WIDGETS,
     START_SHIP_MOVEMENT,
     PLACE_SHIP,
     ROTATE_SHIP,
+    ATTACK_SPACE,
+    START_PLAYER_ROUND,
+    START_COMPUTER_ROUND,
+    END_GAME,
 } from './event-types';
 
 const board1El = document.getElementById('board1');
@@ -43,7 +47,7 @@ export class DisplayController {
                 player.id,
                 this.domEls[player.id].board,
                 this.domEls[player.id].playerName,
-                player.name,
+                player.name
             );
 
             this.boards.push({
@@ -62,7 +66,7 @@ export class DisplayController {
     }
 
     boardSetup(board) {
-        const infoWrapperEl = document.querySelector('.info-wrapper');
+        const infoWrapperEl = document.getElementById('info-wrapper');
 
         // eslint-disable-next-line no-unused-vars
         const infoEl = drawDomElement({
@@ -80,7 +84,9 @@ export class DisplayController {
         });
 
         startButtonEl.addEventListener('click', () => {
-            //logic to start new game
+            clearContents(infoWrapperEl);
+            board.display.refreshBoardAndClearWidgets(board.data);
+            this.game.startGame();
         });
         board.display.addWidgets(board.data);
     }
@@ -146,4 +152,52 @@ export class DisplayController {
         }
     }.bind(this);
     roateShipToken = PubSub.subscribe(ROTATE_SHIP, this.roateShip);
+
+    allowPlayerAttack = function () {
+        const board = this.boards[1];
+
+        board.display.addAttackListeners(board.data.spaces);
+    }.bind(this);
+    allowPlayerAttackToken = PubSub.subscribe(
+        START_PLAYER_ROUND,
+        this.allowPlayerAttack
+    );
+
+    makeComputerAttack = function () {
+        const board = this.boards[0];
+
+        const target = this.game.getLegalTarget(board.data.spaces);
+        this.resolveAttack(board, target.x, target.y);
+    }.bind(this);
+    makeComputerAttackToken = PubSub.subscribe(
+        START_COMPUTER_ROUND,
+        this.makeComputerAttack
+    );
+
+    makePlayerAttack = function (msg, data) {
+        const board = this.boards[data.id];
+
+        if (data.id === 1) {
+            board.display.removeAttackListeners();
+        }
+
+        this.resolveAttack(board, data.x, data.y);
+    }.bind(this);
+    makePlayerAttackToken = PubSub.subscribe(
+        ATTACK_SPACE,
+        this.makePlayerAttack
+    );
+
+    resolveAttack(board, x, y) {
+        board.data.receiveAttack(x, y);
+        board.display.refresh(board.data);
+        this.game.checkGameEnd([this.boards[0].data, this.boards[1].data]);
+        //this.game.startNextRound();
+    }
+
+    endGame = function (msg, winner) {
+        alert(`${winner} wins the game!`);
+        //do stuff to restart the game
+    }.bind(this);
+    endGameToken = PubSub.subscribe(END_GAME, this.endGame);
 }

@@ -153,7 +153,7 @@ button:hover, .space-interactive:hover, .space {
     background-color: rgb(30, 163, 81);
 }
 
-.info-wrapper {
+#info-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
