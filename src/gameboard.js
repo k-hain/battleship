@@ -169,11 +169,16 @@ export class Gameboard {
     }
 
     receiveAttack(x, y) {
-        if (!this.spaces[x][y].isHit) {
-            this.spaces[x][y].isHit = true;
+        const target = this.spaces[x][y];
+        if (!target.isHit) {
+            target.isHit = true;
 
-            if (this.spaces[x][y].ship) {
-                this.spaces[x][y].ship.hit();
+            if (target.ship) {
+                target.ship.hit();
+
+                if (target.ship.isSunk()) {
+                    this.addHitsAround(target.ship);
+                }
             }
         }
     }
