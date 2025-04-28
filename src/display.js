@@ -273,10 +273,10 @@ export class Display {
             el.classList.toggle('blink');
         }
 
-        const blinkingInterval = setInterval(blinkBackground, 200);
+        const blinkingInterval = setInterval(blinkBackground, 110);
 
         setTimeout(() => {
             clearInterval(blinkingInterval);
-        }, 800);
+        }, 440);
     }
 }

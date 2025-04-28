@@ -160,7 +160,7 @@ export class DisplayController {
             this.resolveAttack(board, target.x, target.y);
         }.bind(this);
 
-        setTimeout(attack, 1200);
+        setTimeout(attack, 500);
     }.bind(this);
     makeComputerAttackToken = PubSub.subscribe(
         START_COMPUTER_ROUND,
