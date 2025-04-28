@@ -138,6 +138,17 @@ export class DisplayController {
 
         if (rotated) {
             PubSub.publish(REFRESH_DISPLAY_AND_WIDGETS, data.id);
+        } else {
+            for (let space of data.ship.spaces) {
+                board.display.makeSpaceBlink({x: space.x, y: space.y});
+            }
+
+            const refresh = function () {
+                for (let space of data.ship.spaces) {
+                    board.display.spaces[space.x][space.y].classList.remove('blink');
+                }
+            };
+            setTimeout(refresh, 460);
         }
     }.bind(this);
     roateShipToken = PubSub.subscribe(ROTATE_SHIP, this.roateShip);
