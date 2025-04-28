@@ -1,4 +1,4 @@
-/* global Event, document */
+/* global Event, document, setTimeout */
 
 import PubSub from 'pubsub-js';
 import { Gameboard } from './gameboard.js';
@@ -165,9 +165,13 @@ export class DisplayController {
 
     makeComputerAttack = function () {
         const board = this.boards[0];
-
         const target = this.game.getLegalTarget(board.data.spaces);
-        this.resolveAttack(board, target.x, target.y);
+
+        const attack = function () {
+            this.resolveAttack(board, target.x, target.y);
+        }.bind(this);
+
+        setTimeout(attack, 1200);
     }.bind(this);
     makeComputerAttackToken = PubSub.subscribe(
         START_COMPUTER_ROUND,
@@ -191,8 +195,10 @@ export class DisplayController {
     resolveAttack(board, x, y) {
         board.data.receiveAttack(x, y);
         board.display.refresh(board.data);
+
+        board.display.makeSpaceBlink({ x, y });
+
         this.game.checkGameEnd([this.boards[0].data, this.boards[1].data]);
-        //this.game.startNextRound();
     }
 
     endGame = function (msg, winner) {
