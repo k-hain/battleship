@@ -1,5 +1,5 @@
 import { BOARD_WIDTH, SHIP_LENGTHS } from './global-variables.js';
-import { getRandomBool, getRandomCoords } from './helpers.js';
+import { getRandomBool, getRandomCoords, checkBounds } from './helpers.js';
 
 class Space {
     constructor(x, y) {
@@ -207,7 +207,7 @@ export class Gameboard {
         }
 
         for (let coords of spaces) {
-            if (!this.checkBounds([coords.x, coords.y])) {
+            if (!checkBounds([coords.x, coords.y])) {
                 return false;
             } else if (this.spaces[coords.x][coords.y].ship) {
                 return false;
@@ -254,7 +254,7 @@ export class Gameboard {
         }
 
         for (let coords of spaces) {
-            if (this.checkBounds([coords.x, coords.y])) {
+            if (checkBounds([coords.x, coords.y])) {
                 validatedSpaces.push(coords);
             }
         }
@@ -282,15 +282,6 @@ export class Gameboard {
                 space.isHit = true;
             }
         });
-    }
-
-    checkBounds(values) {
-        for (let value of values) {
-            if (value >= BOARD_WIDTH || value < 0) {
-                return false;
-            }
-        }
-        return true;
     }
 
     getLockedSpaces() {
