@@ -1,3 +1,5 @@
+/* global setInterval, clearInterval, setTimeout */
+
 import { BOARD_WIDTH } from './global-variables.js';
 import { forEachSpace } from './helpers.js';
 import { ShipTransformWidget } from './ship-transform-widget.js';
@@ -262,5 +264,19 @@ export class Display {
         forEachSpace(this.spaces, (el) => {
             el.removeEventListener('click', this.attackSpace);
         });
+    }
+
+    makeSpaceBlink(coords) {
+        const el = this.spaces[coords.x][coords.y];
+
+        function blinkBackground() {
+            el.classList.toggle('blink');
+        }
+
+        const blinkingInterval = setInterval(blinkBackground, 200);
+
+        setTimeout(() => {
+            clearInterval(blinkingInterval);
+        }, 800);
     }
 }
