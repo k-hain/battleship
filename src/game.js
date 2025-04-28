@@ -5,7 +5,12 @@ import {
 } from './event-types.js';
 
 import PubSub from 'pubsub-js';
-import { getRandomBool, forEachSpace, getRandomInt } from './helpers.js';
+import {
+    getRandomBool,
+    forEachSpace,
+    getRandomInt,
+    checkBounds,
+} from './helpers.js';
 
 export class Player {
     constructor(id, name) {
@@ -57,7 +62,13 @@ export class Game {
         }
     }
 
-    getLegalTarget(spaces) {
+    getRandomTarget(targets) {
+        const target = targets[getRandomInt(targets.length)];
+
+        return { x: target.x, y: target.y };
+    }
+
+    getLegalTargets(spaces) {
         let targets = [];
 
         forEachSpace(spaces, (space) => {
@@ -66,8 +77,77 @@ export class Game {
             }
         });
 
-        let target = targets[getRandomInt(targets.length)];
+        return targets;
+    }
 
+    getTarget(boardSpaces) {
+        const targetAround = [];
+        let targets = [];
+        let target;
+
+        forEachSpace(boardSpaces, (space) => {
+            if (space.isHit && space.ship && !space.ship.isSunk()) {
+                targetAround.push(space);
+            }
+        });
+
+        if (targetAround.length) {
+            for (let space of targetAround) {
+                const legalSpacesX = [];
+                const legalSpacesY = [];
+                let targetX = true;
+                let targetY = true;
+
+                const spacesAround = [
+                    { x: space.x + 1, y: space.y, isAxisX: true },
+                    { x: space.x - 1, y: space.y, isAxisX: true },
+                    { x: space.x, y: space.y + 1, isAxisX: false },
+                    { x: space.x, y: space.y - 1, isAxisX: false },
+                ];
+
+                for (let coords of spacesAround) {
+                    if (checkBounds([coords.x, coords.y])) {
+                        const current = boardSpaces[coords.x][coords.y];
+
+                        if (current.isHit && current.ship) {
+                            if (coords.isAxisX) {
+                                targetY = false;
+                            } else {
+                                targetX = false;
+                            }
+                        }
+
+                        if (!current.isHit) {
+                            if (coords.isAxisX) {
+                                legalSpacesX.push({ x: coords.x, y: coords.y });
+                            } else {
+                                legalSpacesY.push({ x: coords.x, y: coords.y });
+                            }
+                        }
+                    }
+                }
+
+                if (legalSpacesX.length && targetX) {
+                    for (let space of legalSpacesX) {
+                        targets.push(space);
+                    }
+                }
+
+                if (legalSpacesY.length && targetY) {
+                    for (let space of legalSpacesY) {
+                        targets.push(space);
+                    }
+                }
+            }
+
+            if (!targets.length) {
+                targets = this.getLegalTargets(boardSpaces);
+            }
+        } else {
+            targets = this.getLegalTargets(boardSpaces);
+        }
+
+        target = this.getRandomTarget(targets);
         return { x: target.x, y: target.y };
     }
 

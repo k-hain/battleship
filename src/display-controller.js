@@ -165,7 +165,7 @@ export class DisplayController {
 
     makeComputerAttack = function () {
         const board = this.boards[0];
-        const target = this.game.getLegalTarget(board.data.spaces);
+        const target = this.game.getTarget(board.data.spaces);
 
         const attack = function () {
             this.resolveAttack(board, target.x, target.y);
