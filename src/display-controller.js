@@ -66,28 +66,17 @@ export class DisplayController {
     }
 
     boardSetup(board) {
-        const infoWrapperEl = document.getElementById('info-wrapper');
-
-        // eslint-disable-next-line no-unused-vars
-        const infoEl = drawDomElement({
-            type: 'div',
-            container: infoWrapperEl,
-            classes: ['info'],
-            text: 'Arrange your ships on the board',
-        });
-
-        const startButtonEl = drawDomElement({
-            type: 'button',
-            container: infoWrapperEl,
-            classes: ['start-btn'],
-            text: 'Start Game',
-        });
-
-        startButtonEl.addEventListener('click', () => {
-            clearContents(infoWrapperEl);
+        const callback = function () {
             board.display.refreshBoardAndClearWidgets(board.data);
             this.game.startGame();
-        });
+        }.bind(this);
+
+        this.addInfoElement(
+            'Arrange your ships on the board',
+            'Start Game',
+            callback
+        );
+
         board.display.addWidgets(board.data);
     }
 
@@ -202,8 +191,35 @@ export class DisplayController {
     }
 
     endGame = function (msg, winner) {
-        alert(`${winner} wins the game!`);
-        //do stuff to restart the game
+        const callback = function () {
+            this.boards = [];
+            this.initBoards();
+        }.bind(this);
+
+        this.addInfoElement(`${winner} wins the game!`, 'Play Again', callback);
     }.bind(this);
     endGameToken = PubSub.subscribe(END_GAME, this.endGame);
+
+    addInfoElement(infoText, btnText, callback) {
+        const infoWrapperEl = document.getElementById('info-wrapper');
+
+        drawDomElement({
+            type: 'div',
+            container: infoWrapperEl,
+            classes: ['info'],
+            text: infoText,
+        });
+
+        const startButtonEl = drawDomElement({
+            type: 'button',
+            container: infoWrapperEl,
+            classes: ['start-btn'],
+            text: btnText,
+        });
+
+        startButtonEl.addEventListener('click', () => {
+            clearContents(infoWrapperEl);
+            callback();
+        });
+    }
 }
