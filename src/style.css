@@ -66,7 +66,10 @@ h6 {
 }
 
 :root {
-    --color-main: rgb(119, 0, 255);
+    --color-main: rgb(21, 97, 238);
+    --color-highlight: rgb(38, 201, 230);
+    --color-error: rgb(223, 30, 127);
+    --color-error-dark: rgb(121, 0, 47);
     --color-white: rgb(255, 255, 255);
     --color-black: rgb(0, 0, 0);
     --color-gray-light: rgb(224, 224, 224);
@@ -139,7 +142,7 @@ button:hover, .space-interactive:hover, .space {
 }
 
 .space-ship {
-    background-color: rgb(89, 107, 165);
+    background-color: var(--color-main);
 }
 
 .space-empty {
@@ -167,10 +170,14 @@ button:hover, .space-interactive:hover, .space {
 }
 
 .start-btn {
-    font-size: 2rem;
-    background-color: var(--color-gray-medium);
-    padding: var(--padding-base) var(--padding-huge);
+    font-size: 1.75rem;
+    background-color: var(--color-main);
+    padding: var(--padding-small) var(--padding-large);
     border-radius: var(--border-radius);
+}
+
+.start-btn:hover {
+    background-color: var(--color-highlight);
 }
 
 .board-button-icon {
@@ -187,17 +194,13 @@ button:hover, .space-interactive:hover, .space {
 }
 
 .ship-dummy {
-    background-color: rgb(80, 184, 202);
+    background-color: var(--color-highlight);
 }
 
 .space-ship.ship-dummy-illegal {
-    background-color: rgb(114, 10, 41);
+    background-color: var(--color-error-dark);
 }
 
-.ship-dummy-illegal {
-    background-color: rgb(199, 48, 106);
-}
-
-.blink {
-    background-color: rgb(199, 48, 68);
+.ship-dummy-illegal, .blink {
+    background-color: var(--color-error);
 }
