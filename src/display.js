@@ -3,9 +3,11 @@
 import { BOARD_WIDTH } from './global-variables.js';
 import { forEachSpace } from './helpers.js';
 import { ShipTransformWidget } from './ship-transform-widget.js';
-import { drawDomElement } from './dom-fns.js';
+import { drawDomElement, clearContents } from './dom-fns.js';
 import PubSub from 'pubsub-js';
 import { PLACE_SHIP, ATTACK_SPACE } from './event-types.js';
+import hitIcon from './svg/close_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
+import fireIcon from './svg/local_fire_department_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg';
 
 export class Display {
     #movedShip = null;
@@ -59,17 +61,37 @@ export class Display {
 
     refresh(boardData) {
         forEachSpace(this.spaces, (el) => {
+            clearContents(el);
+
             el.className = 'space';
-            if (this.id === 1 && !boardData.spaces[el.x][el.y].isHit) {
+
+            const space = boardData.spaces[el.x][el.y];
+
+            if (this.id === 1 && !space.isHit) {
                 el.classList.add('space-hidden');
             } else {
-                if (boardData.spaces[el.x][el.y].ship) {
+                if (space.ship) {
                     el.classList.add('space-ship');
                 } else {
                     el.classList.add('space-empty');
                 }
-                if (boardData.spaces[el.x][el.y].isHit) {
-                    el.textContent = 'X';
+
+                if (space.isHit) {
+                    if (space.ship) {
+                        drawDomElement({
+                            type: 'img',
+                            container: el,
+                            classes: ['.board-button-icon'],
+                            src: fireIcon,
+                        });
+                    } else {
+                        drawDomElement({
+                            type: 'img',
+                            container: el,
+                            classes: ['.board-button-icon'],
+                            src: hitIcon,
+                        });
+                    }
                 }
             }
         });
