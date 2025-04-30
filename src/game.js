@@ -99,10 +99,10 @@ export class Game {
                 let targetY = true;
 
                 const spacesAround = [
-                    { x: space.x + 1, y: space.y, isAxisX: true },
-                    { x: space.x - 1, y: space.y, isAxisX: true },
-                    { x: space.x, y: space.y + 1, isAxisX: false },
-                    { x: space.x, y: space.y - 1, isAxisX: false },
+                    { x: space.x + 1, y: space.y },
+                    { x: space.x - 1, y: space.y },
+                    { x: space.x, y: space.y + 1 },
+                    { x: space.x, y: space.y - 1 },
                 ];
 
                 for (let coords of spacesAround) {
@@ -110,7 +110,7 @@ export class Game {
                         const current = boardSpaces[coords.x][coords.y];
 
                         if (current.isHit && current.ship) {
-                            if (coords.isAxisX) {
+                            if (current.x > space.x || current.x < space.x) {
                                 targetY = false;
                             } else {
                                 targetX = false;
@@ -118,7 +118,7 @@ export class Game {
                         }
 
                         if (!current.isHit) {
-                            if (coords.isAxisX) {
+                            if (current.x > space.x || current.x < space.x) {
                                 legalSpacesX.push({ x: coords.x, y: coords.y });
                             } else {
                                 legalSpacesY.push({ x: coords.x, y: coords.y });
