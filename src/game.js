@@ -68,7 +68,7 @@ export class Game {
         return { x: target.x, y: target.y };
     }
 
-    getLegalTargets(spaces) {
+    getAllLegalTargets(spaces) {
         let targets = [];
 
         forEachSpace(spaces, (space) => {
@@ -81,74 +81,82 @@ export class Game {
     }
 
     getTarget(boardSpaces) {
-        const targetAround = [];
+        const unsunkShipSpaces = [];
         let targets = [];
         let target;
 
         forEachSpace(boardSpaces, (space) => {
             if (space.isHit && space.ship && !space.ship.isSunk()) {
-                targetAround.push(space);
+                unsunkShipSpaces.push(space);
             }
         });
 
-        if (targetAround.length) {
-            for (let space of targetAround) {
-                const legalSpacesX = [];
-                const legalSpacesY = [];
-                let targetX = true;
-                let targetY = true;
-
-                const spacesAround = [
-                    { x: space.x + 1, y: space.y },
-                    { x: space.x - 1, y: space.y },
-                    { x: space.x, y: space.y + 1 },
-                    { x: space.x, y: space.y - 1 },
-                ];
-
-                for (let coords of spacesAround) {
-                    if (checkBounds([coords.x, coords.y])) {
-                        const current = boardSpaces[coords.x][coords.y];
-
-                        if (current.isHit && current.ship) {
-                            if (current.x > space.x || current.x < space.x) {
-                                targetY = false;
-                            } else {
-                                targetX = false;
-                            }
-                        }
-
-                        if (!current.isHit) {
-                            if (current.x > space.x || current.x < space.x) {
-                                legalSpacesX.push({ x: coords.x, y: coords.y });
-                            } else {
-                                legalSpacesY.push({ x: coords.x, y: coords.y });
-                            }
-                        }
-                    }
-                }
-
-                if (legalSpacesX.length && targetX) {
-                    for (let space of legalSpacesX) {
-                        targets.push(space);
-                    }
-                }
-
-                if (legalSpacesY.length && targetY) {
-                    for (let space of legalSpacesY) {
-                        targets.push(space);
-                    }
-                }
-            }
+        if (unsunkShipSpaces.length) {
+            targets = this.findTargetsAround(boardSpaces, unsunkShipSpaces);
 
             if (!targets.length) {
-                targets = this.getLegalTargets(boardSpaces);
+                targets = this.getAllLegalTargets(boardSpaces);
             }
         } else {
-            targets = this.getLegalTargets(boardSpaces);
+            targets = this.getAllLegalTargets(boardSpaces);
         }
 
         target = this.getRandomTarget(targets);
         return { x: target.x, y: target.y };
+    }
+
+    findTargetsAround (boardSpaces, unsunkShipSpaces) {
+        const targets = [];
+
+        for (let space of unsunkShipSpaces) {
+            const legalSpacesX = [];
+            const legalSpacesY = [];
+            let targetX = true;
+            let targetY = true;
+
+            const spacesAround = [
+                { x: space.x + 1, y: space.y },
+                { x: space.x - 1, y: space.y },
+                { x: space.x, y: space.y + 1 },
+                { x: space.x, y: space.y - 1 },
+            ];
+
+            for (let coords of spacesAround) {
+                if (checkBounds([coords.x, coords.y])) {
+                    const current = boardSpaces[coords.x][coords.y];
+
+                    if (current.isHit && current.ship) {
+                        if (current.x > space.x || current.x < space.x) {
+                            targetY = false;
+                        } else {
+                            targetX = false;
+                        }
+                    }
+
+                    if (!current.isHit) {
+                        if (current.x > space.x || current.x < space.x) {
+                            legalSpacesX.push({ x: coords.x, y: coords.y });
+                        } else {
+                            legalSpacesY.push({ x: coords.x, y: coords.y });
+                        }
+                    }
+                }
+            }
+
+            if (legalSpacesX.length && targetX) {
+                for (let space of legalSpacesX) {
+                    targets.push(space);
+                }
+            }
+
+            if (legalSpacesY.length && targetY) {
+                for (let space of legalSpacesY) {
+                    targets.push(space);
+                }
+            }
+        }
+
+        return targets;
     }
 
     checkGameEnd(boards) {
